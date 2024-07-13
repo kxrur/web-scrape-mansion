@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+reqwest = "0.12.5"
 thirtyfour = "0.32.0"
 tokio = "1.38.0"
 webdriver-install = "0.3.2"
