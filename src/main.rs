@@ -1,16 +1,12 @@
 use std::error::Error;
-use std::fs::create_dir_all;
 use std::fs::File;
 use std::io::copy;
 use std::path::Path;
-use std::path::PathBuf;
-use std::thread;
-use std::time::Duration;
-
-use webdriver_install::Driver;
 
 use reqwest::Client;
 use thirtyfour::prelude::*;
+use tokio::time::timeout;
+use webdriver_install::Driver;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -52,34 +48,13 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     println!("clicking");
     elem_image_gallery_block.click().await?;
 
-    // let test = driver
-    //     .find(By::ClassName(
-    //         "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0",
-    //     ))
-    //     .await?;
-    // let images = test.find_all(By::Tag("img")).await?;
-    // for (index, img) in images.iter().enumerate() {
-    //     let src = img.attr("src").await?;
-    //     println!(
-    //         "Image {}: {}",
-    //         index + 1,
-    //         src.unwrap_or("No src attribute".to_string())
-    //     );
-    // }
-
-    for i in 0..5 {
-        let elem_image_block = driver
-            .find(By::ClassName(
-                "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0",
-            ))
-            .await?;
-        //elem_image_gallery_block.send_keys(Key::Right);
-        if 5 == i {
-            eval_images(elem_image_block, true).await?;
-        } else {
-            eval_images(elem_image_block, false).await?;
-        }
-    }
+    let elem_image_block = driver
+        .find(By::ClassName(
+            "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0",
+        ))
+        .await?;
+    //elem_image_gallery_block.send_keys(Key::Right);
+    eval_images(elem_image_block, true).await?;
 
     driver.quit().await?;
 
@@ -91,22 +66,17 @@ async fn eval_images(
     download: bool,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     let images = elem_block.find_all(By::Tag("img")).await?;
-    let client = Client::new();
 
     for (index, img) in images.iter().enumerate() {
         if download {
-            let filename = format!("img/image{}.png", index + 1);
-            img.screenshot(Path::new(&filename)).await?;
-
             if let Some(src) = img.attr("src").await? {
                 println!("Image {}: {}", index + 1, src);
-                download_image(&client, &src, &format!("img/image_{}.jpg", index + 1)).await?;
-            } else {
-                println!("Image {}: No src attribute", index + 1);
-            }
-        } else {
-            if let Some(src) = img.attr("src").await? {
-                println!("Image {}: {}", index + 1, src);
+                download_image(
+                    &Client::new(),
+                    &src,
+                    &format!("img/image_{}.jpg", index + 1),
+                )
+                .await?;
             } else {
                 println!("Image {}: No src attribute", index + 1);
             }
@@ -117,12 +87,20 @@ async fn eval_images(
 async fn download_image(
     client: &Client,
     url: &str,
-    path: &str,
+    file_path: &str,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     let response = client.get(url).send().await?;
     let bytes = response.bytes().await?;
 
-    let mut file = File::create(Path::new(path))?;
+    let path = Path::new(file_path);
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+
+    let mut file = File::create(file_path)?;
     copy(&mut bytes.as_ref(), &mut file)?;
+
+    println!("Downloaded: {}", file_path);
+
     Ok(())
 }
