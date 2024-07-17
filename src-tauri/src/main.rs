@@ -5,6 +5,7 @@ mod images;
 
 use images::greet;
 
+//checkout the commands guid: tauri.app/v1/guides/features/command
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![greet])
