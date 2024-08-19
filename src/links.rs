@@ -1,5 +1,3 @@
-pub mod links;
-
 use regex::Regex;
 use scraper::{Html, Selector};
 use std::fs;
