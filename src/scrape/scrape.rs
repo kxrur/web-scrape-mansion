@@ -16,23 +16,12 @@ pub async fn eval_images(
     for (index, img) in images.iter().enumerate() {
         if download {
             if let Some(src) = img.attr("src").await? {
+                let file_path = format!("some/{}/image_{}.jpg", foldername, index + 1); // Adjust file extension if needed
                 if src.starts_with("data:") {
-                    // Handle data URL
                     println!("Data URL found: {}", src);
-                    let file_path = format!("image_{}.jpg", index + 1); // Adjust file extension if needed
-                    save_data_url_as_image(
-                        &src,
-                        &format!("{}/image_{}.jpg", foldername, index + 1),
-                    )
-                    .await?;
+                    save_data_url_as_image(&src, &file_path).await?;
                 } else {
-                    println!("Image {}: {}", index + 1, src);
-                    download_image(
-                        &Client::new(),
-                        &src,
-                        &format!("{}/image_{}.jpg", foldername, index + 1),
-                    )
-                    .await?;
+                    download_image(&Client::new(), &src, &file_path).await?;
                 }
             } else {
                 println!("Image {}: No src attribute", index + 1);

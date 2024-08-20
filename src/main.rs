@@ -1,5 +1,6 @@
 use std::error::Error;
 use thirtyfour::prelude::*;
+use tokio;
 
 mod links;
 use crate::links::extract_savills_urls;
@@ -18,9 +19,10 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 
     match all_links {
         Ok(urls) => {
+            let mut caps = DesiredCapabilities::chrome();
+            //caps.add_arg("--headless=new")?; // hide the browser
+            let driver = WebDriver::new("http://localhost:9515", caps).await?;
             for url in urls {
-                let caps = DesiredCapabilities::chrome();
-                let driver = WebDriver::new("http://localhost:9515", caps).await?;
                 println!("{}", &url);
                 driver.goto(&url).await?;
 
@@ -85,9 +87,8 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                 } else {
                     println!("Image gallery block not found for URL: {}", url);
                 }
-
-                driver.quit().await?;
             }
+            driver.quit().await?;
         }
         Err(e) => {
             eprintln!("Error: {}", e);

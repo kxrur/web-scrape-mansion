@@ -15,15 +15,12 @@ pub async fn download_image(
     let bytes = response.bytes().await?;
 
     let path = Path::new(file_path);
-    println!("attemptNewDir");
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
     }
 
     let mut file = File::create(file_path)?;
-    println!("attemptCopy");
     copy(&mut bytes.as_ref(), &mut file)?;
-
     println!("Downloaded: {}", file_path);
 
     Ok(())
