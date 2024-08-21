@@ -12,16 +12,22 @@ pub struct Mansion {
     mansion_type: String,
 }
 
-pub fn some_mansions() -> std::result::Result<(), Box<dyn std::error::Error>> {
+pub fn establish_pool() -> Result<Pool, mysql::Error> {
     let url = OptsBuilder::new()
         .user(Some(dotenv!("MYSQL_USER")))
         .pass(Some(dotenv!("MYSQL_PASSWORD")))
         .ip_or_hostname(Some(dotenv!("MYSQL_ADDRESS")))
         .db_name(Some(dotenv!("MYSQL_DATABASE")));
-    let pool = match Pool::new(url) {
-        Ok(it) => it,
-        Err(err) => return Err(Box::new(err)),
-    };
+    // let pool = match Pool::new(url) {
+    //     Ok(it) => it,
+    //     Err(err) => return Err(Box::new(err)),
+    // };
+    let pool = Pool::new(url);
+    return pool;
+}
+
+pub fn some_mansions() -> std::result::Result<(), Box<dyn std::error::Error>> {
+    let pool = establish_pool()?;
 
     let mansions = vec![
         Mansion {

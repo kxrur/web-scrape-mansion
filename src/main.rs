@@ -13,11 +13,12 @@ mod scrape;
 use crate::scrape::scrape::eval_images;
 
 mod database;
-use crate::database::sql::some_mansions;
+use crate::database::sql::{establish_pool, pull, push, some_mansions};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     dotenv().ok();
+    let pool = establish_pool();
     let _ = some_mansions();
     std::process::exit(1);
 
