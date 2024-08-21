@@ -1,3 +1,7 @@
+#[macro_use]
+extern crate dotenv_codegen;
+
+use dotenv::dotenv;
 use std::error::Error;
 use thirtyfour::prelude::*;
 use tokio;
@@ -8,8 +12,15 @@ use crate::links::extract_savills_urls;
 mod scrape;
 use crate::scrape::scrape::eval_images;
 
+mod database;
+use crate::database::sql::some_mansions;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
+    dotenv().ok();
+    let _ = some_mansions();
+    std::process::exit(1);
+
     let file_path = "bookmarks.html";
     let all_links = extract_savills_urls(file_path);
 
