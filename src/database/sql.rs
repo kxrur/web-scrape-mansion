@@ -2,7 +2,7 @@ use mysql::prelude::*;
 use mysql::*;
 
 #[derive(Debug, PartialEq)] // can't use decimal point numbers with 'Eq'
-struct Mansion {
+pub struct Mansion {
     address1: String,
     address2: Option<String>, //allows for None address2
     price: f64,
@@ -19,11 +19,6 @@ pub fn some_mansions() -> std::result::Result<(), Box<dyn std::error::Error>> {
         .ip_or_hostname(Some(dotenv!("MYSQL_ADDRESS")))
         .db_name(Some(dotenv!("MYSQL_DATABASE")));
     let pool = match Pool::new(url) {
-        Ok(it) => it,
-        Err(err) => return Err(Box::new(err)),
-    };
-
-    let mut conn = match pool.get_conn() {
         Ok(it) => it,
         Err(err) => return Err(Box::new(err)),
     };
@@ -67,6 +62,27 @@ pub fn some_mansions() -> std::result::Result<(), Box<dyn std::error::Error>> {
         },
     ];
 
+    let _ = push(&mansions, &pool);
+
+    let selected_mansions = match pull(&pool) {
+        Ok(it) => it,
+        Err(err) => return Err(Box::new(err)),
+    };
+
+    assert_eq!(dbg!(mansions), dbg!(selected_mansions));
+    println!("Yay!");
+
+    Ok(())
+}
+
+pub fn push(
+    mansions: &Vec<Mansion>,
+    pool: &Pool,
+) -> std::result::Result<(), Box<dyn std::error::Error>> {
+    let mut conn = match pool.get_conn() {
+        Ok(it) => it,
+        Err(err) => return Err(Box::new(err)),
+    };
     match conn.exec_batch(
         r"INSERT INTO mansions (address1, address2, price, size, bedrooms, bathrooms, type)
       VALUES (:address1, :address2, :price, :size, :bedrooms, :bathrooms, :type)",
@@ -85,8 +101,15 @@ pub fn some_mansions() -> std::result::Result<(), Box<dyn std::error::Error>> {
         Ok(_) => println!("Insert successful"),
         Err(e) => eprintln!("Insert failed: {:?}", e),
     }
+    Ok(())
+}
 
-    let selected_mansions = match conn.query_map(
+pub fn pull(pool: &Pool) -> Result<Vec<Mansion>, mysql::Error> {
+    let mut conn = match pool.get_conn() {
+        Ok(it) => it,
+        Err(err) => return Err(err),
+    };
+    let selected_mansions = conn.query_map(
         "SELECT address1, address2, price, size, bedrooms, bathrooms, type FROM mansions",
         |(address1, address2, price, size, bedrooms, bathrooms, mansion_type)| Mansion {
             address1,
@@ -97,13 +120,6 @@ pub fn some_mansions() -> std::result::Result<(), Box<dyn std::error::Error>> {
             bathrooms,
             mansion_type,
         },
-    ) {
-        Ok(it) => it,
-        Err(err) => return Err(Box::new(err)),
-    };
-
-    assert_eq!(dbg!(mansions), dbg!(selected_mansions));
-    println!("Yay!");
-
-    Ok(())
+    );
+    return selected_mansions;
 }
