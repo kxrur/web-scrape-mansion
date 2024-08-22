@@ -10,7 +10,9 @@ mod links;
 use crate::links::extract_savills_urls;
 
 mod scrape;
-use crate::scrape::scrape::eval_images;
+use crate::scrape::scrape::{
+    eval_address, eval_images, eval_price, ADDRESS1_CS, ADDRESS2_CS, PRICE_CS,
+};
 
 mod database;
 use crate::database::sql::{establish_pool, pull, push, some_mansions};
@@ -19,8 +21,6 @@ use crate::database::sql::{establish_pool, pull, push, some_mansions};
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     dotenv().ok();
     let pool = establish_pool();
-    let _ = some_mansions();
-    std::process::exit(1);
 
     let file_path = "bookmarks.html";
     let all_links = extract_savills_urls(file_path);
@@ -38,66 +38,59 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                 println!("{}", &url);
                 driver.goto(&url).await?;
 
-                // Attempt to find elements and handle absence gracefully
-                let mut full_address = String::new();
-                if let Ok(elem_address_one) = driver
-                    .find(By::ClassName("sv-property-intro__address-line-1"))
-                    .await
-                {
-                    if let Ok(elem_address_two) = driver
-                        .find(By::ClassName("sv-property-intro__address-line-2"))
+                if let Ok(address1) = eval_address(&driver, ADDRESS1_CS).await {
+                    let address2 = eval_address(&driver, ADDRESS2_CS).await?;
+                    let full_address = format!("{} {}", address1, address2);
+                    println!("full address: {}", full_address);
+                    let price = match eval_price(&driver, PRICE_CS).await {
+                        Ok(it) => Some(it),
+                        Err(_) => {
+                            println!("No price found");
+                            None
+                        }
+                    }; // is an Option<i32> so gotta unwrap when using
+
+                    if let Ok(elem_cookie_block) = driver
+                        .find(By::ClassName("sv-cookie-management__banner-cta"))
                         .await
                     {
-                        full_address = format!(
-                            "{}, {}",
-                            elem_address_one.text().await?,
-                            elem_address_two.text().await?
-                        );
-                        println!("Address: {}", full_address);
+                        if let Ok(elem_cookie_button) =
+                            elem_cookie_block.find(By::Tag("button")).await
+                        {
+                            elem_cookie_button.click().await?;
+                            println!("Past cookie");
+                        } else {
+                            println!("Cookie button not found for URL: {}", url);
+                        }
                     } else {
-                        println!("Address line 2 not found for URL: {}", url);
+                        println!("Cookie block not found for URL: {}", url);
                     }
-                } else {
-                    println!("Address line 1 not found for URL: {}", url);
-                }
 
-                if let Ok(elem_cookie_block) = driver
-                    .find(By::ClassName("sv-cookie-management__banner-cta"))
-                    .await
-                {
-                    if let Ok(elem_cookie_button) = elem_cookie_block.find(By::Tag("button")).await
-                    {
-                        elem_cookie_button.click().await?;
-                        println!("Past cookie");
-                    } else {
-                        println!("Cookie button not found for URL: {}", url);
-                    }
-                } else {
-                    println!("Cookie block not found for URL: {}", url);
-                }
-
-                if let Ok(elem_image_gallery_block) = driver
-                    .find(By::ClassName(
-                        "Gallerystyled__LeadGalleryContent-sc-h7kctk-1",
-                    ))
-                    .await
-                {
-                    elem_image_gallery_block.scroll_into_view().await?;
-                    println!("Clicking");
-                    elem_image_gallery_block.click().await?;
-
-                    if let Ok(elem_image_block) = driver
+                    if let Ok(elem_image_gallery_block) = driver
                         .find(By::ClassName(
-                            "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0",
+                            "Gallerystyled__LeadGalleryContent-sc-h7kctk-1",
                         ))
                         .await
                     {
-                        eval_images(elem_image_block, true, full_address).await?;
+                        elem_image_gallery_block.scroll_into_view().await?;
+                        println!("Clicking");
+                        elem_image_gallery_block.click().await?;
+
+                        if let Ok(elem_image_block) = driver
+                            .find(By::ClassName(
+                                "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0",
+                            ))
+                            .await
+                        {
+                            eval_images(elem_image_block, true, full_address).await?;
+                        } else {
+                            println!("Image block not found for URL: {}", url);
+                        }
                     } else {
-                        println!("Image block not found for URL: {}", url);
+                        println!("Image gallery block not found for URL: {}", url);
                     }
                 } else {
-                    println!("Image gallery block not found for URL: {}", url);
+                    println!("Mansion invalid for URL: {}", url);
                 }
             }
             driver.quit().await?;
