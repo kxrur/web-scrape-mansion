@@ -11,7 +11,7 @@ use crate::links::extract_savills_urls;
 
 mod scrape;
 use crate::scrape::scrape::{
-    eval_address, eval_images, eval_price, ADDRESS1_CS, ADDRESS2_CS, PRICE_CS,
+    eval_address, eval_images, eval_price, eval_size, ADDRESS1_CS, ADDRESS2_CS,
 };
 
 mod database;
@@ -42,13 +42,14 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                     let address2 = eval_address(&driver, ADDRESS2_CS).await?;
                     let full_address = format!("{} {}", address1, address2);
                     println!("full address: {}", full_address);
-                    let price = match eval_price(&driver, PRICE_CS).await {
+                    let price = match eval_price(&driver).await {
                         Ok(it) => Some(it),
                         Err(_) => {
                             println!("No price found");
                             None
                         }
                     }; // is an Option<i32> so gotta unwrap when using
+                    let size = eval_size(&driver).await?;
 
                     if let Ok(elem_cookie_block) = driver
                         .find(By::ClassName("sv-cookie-management__banner-cta"))
