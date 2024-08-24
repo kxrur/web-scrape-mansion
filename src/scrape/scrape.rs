@@ -40,7 +40,7 @@ pub async fn eval_images(
 }
 pub async fn eval_address(driver: &WebDriver, class_name: &str) -> Result<String, WebDriverError> {
     let elem_address = driver.find(By::ClassName(class_name)).await?;
-    let address = elem_address.text().await?.split("\n").take(1).collect(); //TODO find
+    let address = elem_address.text().await?.split("\n").take(1).collect(); //TODO: find
                                                                             //better way to get the first line only
     println!("address: {}\n end", address);
     Ok(address)

@@ -3,13 +3,13 @@ use mysql::*;
 
 #[derive(Debug, PartialEq)] // can't use decimal point numbers with 'Eq'
 pub struct Mansion {
-    address1: String,
-    address2: Option<String>, //allows for None address2
-    price: f64,
-    size: f64,
-    bedrooms: i32,
-    bathrooms: i32,
-    mansion_type: String,
+    pub address1: String,
+    pub address2: Option<String>, //allows for None address2
+    pub price: i32,               // FIXME: fix sql table to have INT price (currently f64)
+    pub size: f64,
+    pub bedrooms: i32,
+    pub bathrooms: i32, //TODO: add a receptions field
+    pub mansion_type: String,
 }
 
 pub fn establish_pool() -> Result<Pool, mysql::Error> {
@@ -33,7 +33,7 @@ pub fn some_mansions() -> std::result::Result<(), Box<dyn std::error::Error>> {
         Mansion {
             address1: "123 Maple St".to_string(),
             address2: Some("Apt 1A".to_string()),
-            price: 15.0,
+            price: 15,
             size: 25.0,
             bedrooms: 4,
             bathrooms: 5,
@@ -42,7 +42,7 @@ pub fn some_mansions() -> std::result::Result<(), Box<dyn std::error::Error>> {
         Mansion {
             address1: "456 Oak Ave".to_string(),
             address2: None,
-            price: 20.0,
+            price: 20,
             size: 30.5,
             bedrooms: 5,
             bathrooms: 6,
@@ -51,7 +51,7 @@ pub fn some_mansions() -> std::result::Result<(), Box<dyn std::error::Error>> {
         Mansion {
             address1: "789 Pine Rd".to_string(),
             address2: Some("Penthouse".to_string()),
-            price: 22.0,
+            price: 22,
             size: 35.0,
             bedrooms: 3,
             bathrooms: 4,
@@ -60,7 +60,7 @@ pub fn some_mansions() -> std::result::Result<(), Box<dyn std::error::Error>> {
         Mansion {
             address1: "101 Elm St".to_string(),
             address2: None,
-            price: 18.0,
+            price: 18,
             size: 28.0,
             bedrooms: 4,
             bathrooms: 4,

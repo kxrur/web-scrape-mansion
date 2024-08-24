@@ -10,13 +10,14 @@ mod links;
 use crate::links::extract_savills_urls;
 
 mod scrape;
+use crate::scrape::action::close_cookie;
 use crate::scrape::scrape::{
     eval_address, eval_images, eval_price, eval_room, eval_size, eval_type, ADDRESS1_CS,
     ADDRESS2_CS,
 };
 
 mod database;
-use crate::database::sql::{establish_pool, pull, push, some_mansions};
+use crate::database::sql::{establish_pool, pull, push, some_mansions, Mansion};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -35,42 +36,40 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
             let caps = DesiredCapabilities::chrome();
             //caps.add_arg("--headless=new")?; // hide the browser
             let driver = WebDriver::new("http://localhost:9515", caps).await?;
-            for url in urls {
-                println!("{}", &url);
-                driver.goto(&url).await?;
+            for (i, url) in urls.iter().enumerate() {
+                println!("{}", url);
+                driver.goto(url).await?;
+                if i == 0 {
+                    close_cookie(&driver, &url).await;
+                }
 
                 if let Ok(address1) = eval_address(&driver, ADDRESS1_CS).await {
                     let address2 = eval_address(&driver, ADDRESS2_CS).await?;
                     let full_address = format!("{} {}", address1, address2);
                     println!("full address: {}", full_address);
-                    let _price = match eval_price(&driver).await {
+                    let price = match eval_price(&driver).await {
                         Ok(it) => Some(it),
                         Err(_) => {
                             println!("No price found");
                             None
                         }
                     }; // is an Option<i32> so gotta extract when using
-                    let _size = eval_size(&driver).await?;
+                    let size = eval_size(&driver).await?;
 
-                    let (_bedrooms, _bathrooms, _receptions) = eval_room(&driver).await?; //option,
+                    let (bedrooms, bathrooms, _receptions) = eval_room(&driver).await?; //option,
 
-                    let _house_type = eval_type(&driver).await?;
+                    let house_type = eval_type(&driver).await?;
 
-                    if let Ok(elem_cookie_block) = driver
-                        .find(By::ClassName("sv-cookie-management__banner-cta"))
-                        .await
-                    {
-                        if let Ok(elem_cookie_button) =
-                            elem_cookie_block.find(By::Tag("button")).await
-                        {
-                            elem_cookie_button.click().await?;
-                            println!("Past cookie");
-                        } else {
-                            println!("Cookie button not found for URL: {}", url);
-                        }
-                    } else {
-                        println!("Cookie block not found for URL: {}", url);
-                    }
+                    // let mansion = Mansion {
+                    //     address1: address1,
+                    //     address2: Some(address2),
+                    //     price: price.unwrap(),
+                    //     size: size,
+                    //     bedrooms: bedrooms.unwrap(),
+                    //     bathrooms: bathrooms.unwrap(),
+                    //     mansion_type: house_type,
+                    // };
+                    // println!("my mansion (without receptions): \n{:?}", mansion);
 
                     if let Ok(elem_image_gallery_block) = driver
                         .find(By::ClassName(
