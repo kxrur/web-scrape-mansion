@@ -11,7 +11,8 @@ use crate::links::extract_savills_urls;
 
 mod scrape;
 use crate::scrape::scrape::{
-    eval_address, eval_images, eval_price, eval_room, eval_size, ADDRESS1_CS, ADDRESS2_CS,
+    eval_address, eval_images, eval_price, eval_room, eval_size, eval_type, ADDRESS1_CS,
+    ADDRESS2_CS,
 };
 
 mod database;
@@ -52,6 +53,8 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                     let _size = eval_size(&driver).await?;
 
                     let (_bedrooms, _bathrooms, _receptions) = eval_room(&driver).await?; //option,
+
+                    let _house_type = eval_type(&driver).await?;
 
                     if let Ok(elem_cookie_block) = driver
                         .find(By::ClassName("sv-cookie-management__banner-cta"))

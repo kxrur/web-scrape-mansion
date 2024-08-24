@@ -10,6 +10,7 @@ pub const ADDRESS2_CS: &str = "sv-property-intro__address-line-2";
 pub const PRICE_CS: &str = "sv-property-price__wrap:nth-child(2) > span:nth-child(3)";
 pub const SIZE_CS: &str = "sv--size > span:nth-child(1)";
 pub const ROOMS_CS: &str = "sv-property-intro-footer__group:nth-child(2)";
+pub const TYPE_CS: &str = "sv-property-intro-footer__group:nth-child(1) > div:nth-child(1)";
 
 pub async fn eval_images(
     elem_block: WebElement,
@@ -106,4 +107,12 @@ pub async fn eval_room(
         room, bath, rec
     );
     Ok((room, bath, rec))
+}
+
+pub async fn eval_type(driver: &WebDriver) -> Result<String, WebDriverError> {
+    let elem_address = driver.find(By::ClassName(TYPE_CS)).await?;
+    let house_type = elem_address.text().await?;
+
+    println!("Type: {}", house_type);
+    Ok(house_type)
 }
