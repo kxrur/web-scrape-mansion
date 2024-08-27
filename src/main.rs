@@ -53,7 +53,13 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                             None
                         }
                     }; // is an Option<i32> so gotta extract when using
-                    let size = eval_size(&driver).await?;
+                    let size = match eval_size(&driver).await {
+                        Ok(it) => Some(it),
+                        Err(_e) => {
+                            println!("did not find size item");
+                            None
+                        }
+                    };
 
                     let (bedrooms, bathrooms, _receptions) = eval_room(&driver).await?; //option,
 
