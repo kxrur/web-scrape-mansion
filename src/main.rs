@@ -12,8 +12,7 @@ use crate::links::extract_savills_urls;
 mod scrape;
 use crate::scrape::action::close_cookie;
 use crate::scrape::scrape::{
-    eval_address, eval_images, eval_price, eval_room, eval_size, eval_type, ADDRESS1_CS,
-    ADDRESS2_CS,
+    eval_address, eval_imgs, eval_price, eval_room, eval_size, eval_type, ADDRESS1_CS, ADDRESS2_CS,
 };
 
 mod database;
@@ -35,7 +34,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         Ok(urls) => {
             let caps = DesiredCapabilities::chrome();
             //caps.add_arg("--headless=new")?; // hide the browser
-            let driver = WebDriver::new("http://localhost:9515", caps).await?;
+            let driver = WebDriver::new("http://localhost:43461", caps).await?;
             for (i, url) in urls.iter().enumerate() {
                 println!("{}", url);
                 driver.goto(url).await?;
@@ -60,9 +59,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 
                     let house_type = eval_type(&driver).await?;
 
-                    // let mansion = Mansion {
-                    //     address1: address1,
-                    //     address2: Some(address2),
+                    // let mansion = Mansion { address1: address1, address2: Some(address2),
                     //     price: price.unwrap(),
                     //     size: size,
                     //     bedrooms: bedrooms.unwrap(),
@@ -71,29 +68,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                     // };
                     // println!("my mansion (without receptions): \n{:?}", mansion);
 
-                    if let Ok(elem_image_gallery_block) = driver
-                        .find(By::ClassName(
-                            "Gallerystyled__LeadGalleryContent-sc-h7kctk-1",
-                        ))
-                        .await
-                    {
-                        elem_image_gallery_block.scroll_into_view().await?;
-                        println!("Clicking");
-                        elem_image_gallery_block.click().await?;
-
-                        if let Ok(elem_image_block) = driver
-                            .find(By::ClassName(
-                                "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0",
-                            ))
-                            .await
-                        {
-                            eval_images(elem_image_block, true, full_address).await?;
-                        } else {
-                            println!("Image block not found for URL: {}", url);
-                        }
-                    } else {
-                        println!("Image gallery block not found for URL: {}", url);
-                    }
+                    eval_imgs(&driver, &address1).await;
                 } else {
                     println!("Mansion invalid for URL: {}", url);
                 }

@@ -1,9 +1,10 @@
 use regex::Regex;
 use reqwest::Client;
-use std::error::Error;
 use thirtyfour::prelude::*;
 
 use crate::scrape::save::{download_image, save_data_url_as_image};
+
+use super::save::recursive_rename;
 
 pub const ADDRESS1_CS: &str = "sv-property-intro__address-line-1";
 pub const ADDRESS2_CS: &str = "sv-property-intro__address-line-2";
@@ -12,35 +13,9 @@ pub const SIZE_CS: &str = "sv--size > span:nth-child(1)";
 pub const ROOMS_CS: &str = "sv-property-intro-footer__group:nth-child(2)";
 pub const TYPE_CS: &str = "sv-property-intro-footer__group:nth-child(1) > div:nth-child(1)";
 
-pub async fn eval_images(
-    elem_block: WebElement,
-    download: bool,
-    mut foldername: String,
-) -> Result<(), Box<dyn Error + Send + Sync>> {
-    foldername.retain(|c| !c.is_whitespace());
-
-    let images = elem_block.find_all(By::Tag("img")).await?;
-
-    for (index, img) in images.iter().enumerate() {
-        if download {
-            if let Some(src) = img.attr("src").await? {
-                let file_path = format!("some/{}/image_{}.jpg", foldername, index + 1); // Adjust file extension if needed
-                if src.starts_with("data:") {
-                    println!("Data URL found: {}", src);
-                    save_data_url_as_image(&src, &file_path).await?;
-                } else {
-                    download_image(&Client::new(), &src, &file_path).await?;
-                }
-            } else {
-                println!("Image {}: No src attribute", index + 1);
-            }
-        }
-    }
-    Ok(())
-}
 pub async fn eval_address(driver: &WebDriver, class_name: &str) -> Result<String, WebDriverError> {
     let elem_address = driver.find(By::ClassName(class_name)).await?;
-    let address = elem_address.text().await?.split("\n").take(1).collect(); //TODO: find
+    let address = elem_address.text().await?.split('\n').take(1).collect(); //TODO: find
                                                                             //better way to get the first line only
     println!("address: {}\n end", address);
     Ok(address)
@@ -115,4 +90,59 @@ pub async fn eval_type(driver: &WebDriver) -> Result<String, WebDriverError> {
 
     println!("Type: {}", house_type);
     Ok(house_type)
+}
+
+pub async fn eval_imgs(driver: &WebDriver, address1: &String) {
+    let elem_image_gallery_block = driver
+        .find(By::ClassName(
+            "Gallerystyled__LeadGalleryContent-sc-h7kctk-1",
+        ))
+        .await
+        .expect("failed to get the image gallery block");
+
+    let _ = elem_image_gallery_block.click().await;
+
+    let elem_image_block = driver
+        .find(By::ClassName(
+            "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0",
+        ))
+        .await
+        .expect("did not find the image block");
+    let images = elem_image_block
+        .find_all(By::Tag("img"))
+        .await
+        .expect("no 'img' tags where found in the image block");
+    for img in images.iter() {
+        let name = img
+            .attr("alt")
+            .await
+            .expect("no alt attribute was found for image")
+            .expect("alt message is wrong")
+            .split('-')
+            .collect::<Vec<&str>>()[0]
+            .trim()
+            .replace(' ', "_");
+        let src = img
+            .attr("src")
+            .await
+            .expect("no src attr found")
+            .expect("src attr is wrong");
+
+        let foldername = remove_spaces(address1.clone());
+        let file_path = recursive_rename(&format!("images/{}/{}.jpg", foldername, &name)).await;
+
+        if src.starts_with("data:") {
+            println!("Data URL found: {}", src);
+            save_data_url_as_image(&src, &file_path)
+                .await
+                .expect("data URL did not save");
+        } else {
+            download_image(&Client::new(), &src, &file_path)
+                .await
+                .expect("src URL did not save");
+        }
+    }
+}
+fn remove_spaces(txt: String) -> String {
+    txt.trim().replace(' ', "_")
 }
