@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                 println!("{}", url);
                 driver.goto(url).await?;
                 if i == 0 {
-                    close_cookie(&driver, &url).await;
+                    close_cookie(&driver, url).await;
                 }
 
                 if let Ok(address1) = eval_address(&driver, ADDRESS1_CS).await {

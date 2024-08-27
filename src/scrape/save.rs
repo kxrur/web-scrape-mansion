@@ -65,7 +65,7 @@ pub async fn recursive_rename(file_path: &str) -> String {
     let new_file_name;
 
     let re = Regex::new(r"(.*)\((?<number>[0-9]*)").unwrap();
-    if let Some(caps) = re.captures(&file_name) {
+    if let Some(caps) = re.captures(file_name) {
         new_file_name = format!(
             "{}{}",
             file_name,

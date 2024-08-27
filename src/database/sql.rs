@@ -22,8 +22,8 @@ pub fn establish_pool() -> Result<Pool, mysql::Error> {
     //     Ok(it) => it,
     //     Err(err) => return Err(Box::new(err)),
     // };
-    let pool = Pool::new(url);
-    return pool;
+
+    Pool::new(url)
 }
 
 pub fn some_mansions() -> std::result::Result<(), Box<dyn std::error::Error>> {
@@ -115,7 +115,8 @@ pub fn pull(pool: &Pool) -> Result<Vec<Mansion>, mysql::Error> {
         Ok(it) => it,
         Err(err) => return Err(err),
     };
-    let selected_mansions = conn.query_map(
+
+    conn.query_map(
         "SELECT address1, address2, price, size, bedrooms, bathrooms, type FROM mansions",
         |(address1, address2, price, size, bedrooms, bathrooms, mansion_type)| Mansion {
             address1,
@@ -126,6 +127,5 @@ pub fn pull(pool: &Pool) -> Result<Vec<Mansion>, mysql::Error> {
             bathrooms,
             mansion_type,
         },
-    );
-    return selected_mansions;
+    )
 }

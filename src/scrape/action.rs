@@ -1,4 +1,4 @@
-use thirtyfour::{By, WebDriver, WebElement};
+use thirtyfour::{By, WebDriver};
 
 pub async fn close_cookie(driver: &WebDriver, url: &String) {
     if let Ok(elem_cookie_block) = driver
