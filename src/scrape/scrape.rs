@@ -12,6 +12,8 @@ pub const PRICE_CS: &str = "sv-property-price__wrap:nth-child(2) > span:nth-chil
 pub const SIZE_CS: &str = "sv--size > span:nth-child(1)";
 pub const ROOMS_CS: &str = "sv-property-intro-footer__group:nth-child(2)";
 pub const TYPE_CS: &str = "sv-property-intro-footer__group:nth-child(1) > div:nth-child(1)";
+pub const GALLERY_BLOCK: &str = "Gallerystyled__LeadGalleryContent-sc-h7kctk-1";
+pub const GALLERY_IMG: &str = "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0";
 
 pub async fn eval_address(driver: &WebDriver, class_name: &str) -> Result<String, WebDriverError> {
     let elem_address = driver.find(By::ClassName(class_name)).await?;
@@ -103,18 +105,14 @@ pub async fn eval_type(driver: &WebDriver) -> Result<String, WebDriverError> {
 
 pub async fn eval_imgs(driver: &WebDriver, address1: &String) {
     let elem_image_gallery_block = driver
-        .find(By::ClassName(
-            "Gallerystyled__LeadGalleryContent-sc-h7kctk-1",
-        ))
+        .find(By::ClassName(GALLERY_BLOCK))
         .await
         .expect("failed to get the image gallery block");
 
     let _ = elem_image_gallery_block.click().await;
 
     let elem_image_block = driver
-        .find(By::ClassName(
-            "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0",
-        ))
+        .find(By::ClassName(GALLERY_IMG))
         .await
         .expect("did not find the image block");
     let images = elem_image_block
