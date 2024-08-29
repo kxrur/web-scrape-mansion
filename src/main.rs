@@ -25,6 +25,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 
     let file_path = "bookmarks.html";
     let all_links = extract_savills_urls(file_path);
+    delete_all_imgs("images").expect("failed to delete all stored images");
 
     //Driver::Chrome.install();
 
@@ -35,6 +36,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
             let caps = DesiredCapabilities::chrome();
             //caps.add_arg("--headless=new")?; // hide the browser
             let driver = WebDriver::new("http://localhost:43945", caps).await?;
+            //FIXME: make sure url is unique (have duplicates in data)
             for (i, url) in urls.iter().enumerate() {
                 println!("{}", url);
                 driver.goto(url).await?;
@@ -76,5 +78,9 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
             eprintln!("Error: {}", e);
         }
     }
+    Ok(()) // full run with current addresses took 5m47s
+}
+fn delete_all_imgs(path: &str) -> std::io::Result<()> {
+    std::fs::remove_dir_all(path)?;
     Ok(())
 }
