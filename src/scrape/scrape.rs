@@ -20,13 +20,22 @@ pub async fn eval_address(driver: &WebDriver, class_name: &str) -> Result<String
     println!("address: {}\n end", address);
     Ok(address)
 }
+//FIXME: check for price in pound sterling in the first entry first and then move to second
+//test on this listing: https://search.savills.com/property-detail/gbsvrsses210267
 pub async fn eval_price(driver: &WebDriver) -> Result<i32, WebDriverError> {
     let elem_price = driver.find(By::ClassName(PRICE_CS)).await?;
     let mut price_str = elem_price.text().await?;
 
     price_str.retain(|c| c != '£' && c != ',' && c != '(' && c != ')');
 
-    let price: i32 = price_str.parse().unwrap();
+    let price = match price_str.parse::<i32>() {
+        Ok(it) => Some(it),
+        Err(_e) => {
+            println!("failed on: {price_str}");
+            None
+        }
+    }
+    .unwrap();
 
     println!("price: {}", price);
     Ok(price)
@@ -113,7 +122,7 @@ pub async fn eval_imgs(driver: &WebDriver, address1: &String) {
         .await
         .expect("no 'img' tags where found in the image block");
     for img in images.iter() {
-        let name = img
+        let mut name = img
             .attr("alt")
             .await
             .expect("no alt attribute was found for image")
@@ -122,6 +131,9 @@ pub async fn eval_imgs(driver: &WebDriver, address1: &String) {
             .collect::<Vec<&str>>()[0]
             .trim()
             .replace(' ', "_");
+        if name.is_empty() {
+            name = "_".to_string();
+        }
         let src = img
             .attr("src")
             .await

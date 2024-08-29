@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         Ok(urls) => {
             let caps = DesiredCapabilities::chrome();
             //caps.add_arg("--headless=new")?; // hide the browser
-            let driver = WebDriver::new("http://localhost:43461", caps).await?;
+            let driver = WebDriver::new("http://localhost:43945", caps).await?;
             for (i, url) in urls.iter().enumerate() {
                 println!("{}", url);
                 driver.goto(url).await?;
@@ -52,7 +52,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                             println!("No price found");
                             None
                         }
-                    }; // is an Option<i32> so gotta extract when using
+                    };
                     let size = match eval_size(&driver).await {
                         Ok(it) => Some(it),
                         Err(_e) => {
@@ -61,18 +61,9 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                         }
                     };
 
-                    let (bedrooms, bathrooms, _receptions) = eval_room(&driver).await?; //option,
+                    let (bedrooms, bathrooms, receptions) = eval_room(&driver).await?;
 
                     let house_type = eval_type(&driver).await?;
-
-                    // let mansion = Mansion { address1: address1, address2: Some(address2),
-                    //     price: price.unwrap(),
-                    //     size: size,
-                    //     bedrooms: bedrooms.unwrap(),
-                    //     bathrooms: bathrooms.unwrap(),
-                    //     mansion_type: house_type,
-                    // };
-                    // println!("my mansion (without receptions): \n{:?}", mansion);
 
                     eval_imgs(&driver, &address1).await;
                 } else {

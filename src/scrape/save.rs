@@ -64,16 +64,13 @@ pub async fn recursive_rename(file_path: &str) -> String {
     let file_name = path.file_stem().expect("can't get stem").to_str().unwrap();
     let new_file_name;
 
-    let re = Regex::new(r"(.*)\((?<number>[0-9]*)").unwrap();
+    let re = Regex::new(r"(.*)\((?<number>[0-9]*)\)").unwrap();
     if let Some(caps) = re.captures(file_name) {
-        new_file_name = format!(
-            "{}{}",
-            file_name,
-            caps["number"]
-                .parse::<i32>()
-                .expect("failed to parse file number")
-                + 1
-        );
+        let number = &caps["number"];
+        let number_int: i32 = number.parse().expect("failed to parse nubmer to int");
+        let replace_pattern = format!("({})", number);
+        new_file_name =
+            file_name.replace(&replace_pattern, format!("({})", number_int + 1).as_str());
     } else {
         new_file_name = file_name.to_string() + "(1)";
     };
