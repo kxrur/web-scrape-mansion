@@ -8,7 +8,8 @@ use super::save::recursive_rename;
 
 pub const ADDRESS1_CS: &str = "sv-property-intro__address-line-1";
 pub const ADDRESS2_CS: &str = "sv-property-intro__address-line-2";
-pub const PRICE_CS: &str = "sv-property-price__wrap:nth-child(2) > span:nth-child(3)";
+//pub const PRICE_CS: &str = "sv-property-price__wrap:nth-child(2) > span:nth-child(3)";
+pub const PRICE_CS: &str = "sv-property-price__wrap:nth-child(2)";
 pub const SIZE_CS: &str = "sv--size > span:nth-child(1)";
 pub const ROOMS_CS: &str = "sv-property-intro-footer__group:nth-child(2)";
 pub const TYPE_CS: &str = "sv-property-intro-footer__group:nth-child(1) > div:nth-child(1)";
@@ -22,13 +23,15 @@ pub async fn eval_address(driver: &WebDriver, class_name: &str) -> Result<String
     println!("address: {}\n end", address);
     Ok(address)
 }
-//FIXME: check for price in pound sterling in the first entry first and then move to second
-//test on this listing: https://search.savills.com/property-detail/gbsvrsses210267
 pub async fn eval_price(driver: &WebDriver) -> Result<i32, WebDriverError> {
     let elem_price = driver.find(By::ClassName(PRICE_CS)).await?;
     let mut price_str = elem_price.text().await?;
 
-    price_str.retain(|c| c != '£' && c != ',' && c != '(' && c != ')');
+    price_str.retain(|c| c != ','); //want an easier regex to deal with
+    let re = Regex::new(r"(.*)(?<price>£[0-9].*)(.*)").unwrap();
+    let caps = re.captures(&price_str).expect("no matches found");
+    price_str = caps["price"].to_string();
+    price_str.retain(|c| c.is_ascii_digit()); // remove trailing spaces / parentheses
 
     let price = match price_str.parse::<i32>() {
         Ok(it) => Some(it),
