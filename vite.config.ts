@@ -1,38 +1,30 @@
-import path from 'node:path'
-import vue from '@vitejs/plugin-vue'
-import { defineConfig } from 'vite'
+import { fileURLToPath, URL } from 'url';
 
-import tailwind from 'tailwindcss'
-import autoprefixer from 'autoprefixer'
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
 
-export default defineConfig({
-
-  css: {
-    postcss: {
-      plugins: [tailwind(), autoprefixer()],
-    },
-  },
+// https://vitejs.dev/config/
+export default defineConfig(async () => ({
   plugins: [vue()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@s': fileURLToPath(new URL('./src', import.meta.url)),
+      '@c': fileURLToPath(new URL('./src/components', import.meta.url)),
+      '@v': fileURLToPath(new URL('./src/views', import.meta.url)),
+      '@a': fileURLToPath(new URL('./src/assets', import.meta.url)),
+    }
+  },
+  // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
+  //
+  // 1. prevent vite from obscuring rust errors
+  clearScreen: false,
+  // 2. tauri expects a fixed port, fail if that port is not available
+  server: {
+    port: 1420,
+    strictPort: true,
+    watch: {
+      // 3. tell vite to ignore watching `src-tauri`
+      ignored: ["**/src-tauri/**"],
     },
   },
-  // prevent vite from obscuring rust errors
-  clearScreen: false,
-  // Tauri expects a fixed port, fail if that port is not available
-  server: {
-    strictPort: true,
-    port: 5173,
-  },
-  // to access the Tauri environment variables set by the CLI with information about the current target
-  envPrefix: ['VITE_', 'TAURI_PLATFORM', 'TAURI_ARCH', 'TAURI_FAMILY', 'TAURI_PLATFORM_VERSION', 'TAURI_PLATFORM_TYPE', 'TAURI_DEBUG'],
-  build: {
-    // Tauri uses Chromium on Windows and WebKit on macOS and Linux
-    target: process.env.TAURI_PLATFORM == 'windows' ? 'chrome105' : 'safari13',
-    // don't minify for debug builds
-    minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
-    // produce sourcemaps for debug builds
-    sourcemap: !!process.env.TAURI_DEBUG,
-  },
-})
+}));
