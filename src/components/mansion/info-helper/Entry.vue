@@ -16,9 +16,11 @@ function validatePropsLength(datas: string[], icons?: string[]) {
 
 <template>
   <div class="rounded-3xl bg-highlight text-foreground px-3 py-2">
-    <span v-for="(data, index) in datas">
+    <span v-for="(data, index) in datas" class="flex items-center space-x-1">
       <img v-if="icons && icons[index]" :src="icons[index]" alt="data-icon">
-      {{ data }}
+      <div>
+        {{ data }}
+      </div>
     </span>
   </div>
 </template>

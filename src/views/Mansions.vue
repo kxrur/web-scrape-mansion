@@ -6,7 +6,7 @@ import Info from '@c/mansion/Info.vue'
 </script>
 
 <template>
-  <div class="inline-flex space-x-20">
+  <div class="inline-flex  space-x-20">
     <Pcitures></Pcitures>
     <Info></Info>
   </div>
