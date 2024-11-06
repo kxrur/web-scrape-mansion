@@ -1,23 +1,21 @@
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   pictures: string[],
 }>()
 </script>
 
 <template>
   <div>
-    <h1>may work</h1>
-
     <div id="gallery" class="relative w-full" data-carousel="slide">
       <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
         <div class="hidden duration-700 ease-in-out" data-carousel-item>
           <img v-for="(picture, index) in pictures" :key="index" :src="picture"
-            class="absolute block max-w-full h-auto -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="">
+            class="absolute block max-w-full h-auto -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
+            alt="some image">
         </div>
       </div>
     </div>
   </div>
-  <!-- Slider controls -->
   <button type="button"
     class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
     data-carousel-prev>

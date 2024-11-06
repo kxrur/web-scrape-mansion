@@ -2,12 +2,15 @@
 import Pcitures from '@c/mansion/Pictures.vue'
 import Info from '@c/mansion/Info.vue'
 
+const images = [
+  "src/assets/images/Blairlogie_Castle/Aerial(3).jpg"
+]
 
 </script>
 
 <template>
   <div class="inline-flex  space-x-20">
-    <Pcitures></Pcitures>
+    <Pcitures :pictures="images"></Pcitures>
     <Info></Info>
   </div>
 </template>
