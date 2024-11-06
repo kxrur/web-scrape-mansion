@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         Ok(urls) => {
             let caps = DesiredCapabilities::chrome();
             //caps.add_arg("--headless=new")?; // hide the browser
-            let driver = WebDriver::new("http://localhost:34529", caps).await?;
+            let driver = WebDriver::new("http://localhost:33385", caps).await?;
             //FIXME: make sure url is unique (have duplicates in data)
             for (i, url) in urls.iter().enumerate() {
                 println!("{}", url);
