@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import Mansion from '@v/Mansions.vue'
+import Pictures from './components/mansion/Pictures.vue';
+
+const images = [
+  "src/assets/images/Blairlogie_Castle/Aerial(3).jpg"
+]
 </script>
 
 <template>
-  <div class="bg-background pt-2 pl-24 pr-24">
-    <h1 class="text-foreground">Hello world</h1>
-    <Mansion></Mansion>
+  <div class="bg-background h-screen">
+    <Pictures :pictures="images"></Pictures>
   </div>
 </template>
