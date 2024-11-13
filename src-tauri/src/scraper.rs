@@ -1,25 +1,23 @@
-#[macro_use]
-extern crate dotenv_codegen;
-
 use dotenv::dotenv;
 use std::error::Error;
 use thirtyfour::prelude::*;
 use tokio;
 
-mod links;
 use crate::links::extract_savills_urls;
 
-mod scrape;
 use crate::scrape::action::close_cookie;
 use crate::scrape::scrape::{
     eval_address, eval_imgs, eval_price, eval_room, eval_size, eval_type, ADDRESS1_CS, ADDRESS2_CS,
 };
 
-mod database;
 use crate::database::sql::{establish_pool, pull, push, some_mansions, Mansion};
 
+pub fn testing() -> String {
+    "images".to_string()
+}
+
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
+pub async fn massive_scrape() -> Result<(), Box<dyn Error + Send + Sync>> {
     dotenv().ok();
     let _pool = establish_pool();
 
