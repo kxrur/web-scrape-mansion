@@ -22,7 +22,6 @@ pub fn testing() -> String {
 #[tokio::main]
 pub async fn massive_scrape() -> Result<(), Box<dyn Error + Send + Sync>> {
     dotenv().ok();
-    let _pool = establish_pool();
 
     let file_path = "bookmarks.html";
     let all_links = extract_savills_urls(file_path);

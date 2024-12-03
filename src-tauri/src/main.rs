@@ -7,12 +7,19 @@ extern crate dotenv_codegen;
 mod links;
 mod scrape;
 mod scraper;
+mod store;
+use log::debug;
+use store::bucket::{connect_bucket, write_to_bucket};
 use tokio;
 
 use crate::scraper::{massive_scrape, testing, testing_async};
 
-fn main() {
-    let _ = massive_scrape();
+#[tokio::main]
+async fn main() {
+    env_logger::init();
+    let _ = connect_bucket("mansion-images").await;
+    write_to_bucket("src/text.txt", "mansion-images").await;
+    //let _ = massive_scrape();
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![greet, test])
