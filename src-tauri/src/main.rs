@@ -4,7 +4,6 @@
 #[macro_use]
 extern crate dotenv_codegen;
 
-mod database;
 mod links;
 mod scrape;
 mod scraper;

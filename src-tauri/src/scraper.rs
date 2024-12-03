@@ -10,8 +10,6 @@ use crate::scrape::scrape::{
     eval_address, eval_imgs, eval_price, eval_room, eval_size, eval_type, ADDRESS1_CS, ADDRESS2_CS,
 };
 
-use crate::database::sql::{establish_pool, pull, push, some_mansions, Mansion};
-
 #[tokio::main]
 pub async fn testing_async() -> String {
     "async_imagees".to_string()
