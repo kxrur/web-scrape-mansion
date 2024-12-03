@@ -10,9 +10,11 @@ mod scrape;
 mod scraper;
 use tokio;
 
-use crate::scraper::{massive_scrape, testing};
+use crate::scraper::{massive_scrape, testing, testing_async};
 
 fn main() {
+    let _ = massive_scrape();
+
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![greet, test])
         .run(tauri::generate_context!())
@@ -26,4 +28,9 @@ fn greet(name: &str) -> String {
 #[tauri::command]
 fn test() -> String {
     testing()
+}
+
+#[tauri::command]
+async fn test_async() -> String {
+    testing_async()
 }

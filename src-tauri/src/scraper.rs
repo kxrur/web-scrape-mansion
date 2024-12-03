@@ -12,6 +12,11 @@ use crate::scrape::scrape::{
 
 use crate::database::sql::{establish_pool, pull, push, some_mansions, Mansion};
 
+#[tokio::main]
+pub async fn testing_async() -> String {
+    "async_imagees".to_string()
+}
+
 pub fn testing() -> String {
     "images".to_string()
 }
@@ -79,5 +84,11 @@ pub async fn massive_scrape() -> Result<(), Box<dyn Error + Send + Sync>> {
     Ok(()) // full run with current addresses took 5m47s
 }
 fn delete_all_imgs(path: &str) {
-    let _ = std::fs::remove_dir_all(path);
+    match std::fs::exists(path) {
+        Ok(_) => {
+            let _ = std::fs::remove_dir_all(path);
+            println!("Deleted images in <{path}> successfully")
+        }
+        Err(e) => println!("Failed to delete images in <{path}>: {}", e),
+    };
 }
