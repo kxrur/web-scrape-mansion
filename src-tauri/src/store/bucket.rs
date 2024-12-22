@@ -51,8 +51,6 @@ pub async fn write_to_bucket(filename: &str, bucket_name: &str) {
 }
 
 pub async fn read_from_bucket(filename: &str, bucket_name: &str) {
-    let bucket = match Client::default().bucket().read(bucket_name).await {
-        Ok(_) => debug!("successfully read bucket {bucket_name}"),
-        Err(e) => eprintln!("error during read of bucket: {e}"),
-    };
+    let bucket = connect_bucket(bucket_name).await.unwrap();
+    //FIXME: add logic to read files
 }
