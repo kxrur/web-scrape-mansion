@@ -13,6 +13,7 @@ declare module 'vue' {
     LoginFIXME: typeof import('./components/user/LoginFIXME.vue')['default']
     MansionInfo: typeof import('./components/mansion/MansionInfo.vue')['default']
     NavBar: typeof import('./components/navigation/NavBar.vue')['default']
+    RegisterFIXME: typeof import('./components/user/RegisterFIXME.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }
