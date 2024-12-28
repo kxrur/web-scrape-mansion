@@ -13,7 +13,7 @@ use tokio;
 use crate::scraper::{massive_scrape, testing, testing_async};
 
 fn main() {
-    let _ = massive_scrape();
+    //let _ = massive_scrape();
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![greet, test])
