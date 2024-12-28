@@ -10,9 +10,6 @@ rust-version = "1.77.2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[lib]
-name = "app_lib"
-crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2.0.2", features = [] }
@@ -23,3 +20,15 @@ serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
 tauri = { version = "2.1.0", features = [] }
 tauri-plugin-log = "2.0.0-rc"
+thirtyfour = "0.32.0"
+tokio = "1.38.0"
+webdriver-install = "0.3.2"
+image = "0.25.1"
+reqwest = { version = "0.12.5", features = ["blocking"] }
+scraper = "0.20.0"
+regex = "1.10.6"
+base64 = "0.22.1"
+mysql = "25.0.1"
+dotenv_codegen = "0.15.0"
+dotenv = "0.15.0"
+async-recursion = "1.1.1"
