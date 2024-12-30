@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AllMansions: typeof import('./components/mansion/AllMansions.vue')['default']
     AppFooter: typeof import('./components/navigation/AppFooter.vue')['default']
+    Counter: typeof import('./components/dev/Counter.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     LoginFIXME: typeof import('./components/user/LoginFIXME.vue')['default']
     MansionInfo: typeof import('./components/mansion/MansionInfo.vue')['default']

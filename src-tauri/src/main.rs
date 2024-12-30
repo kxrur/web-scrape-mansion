@@ -8,15 +8,26 @@ mod database;
 mod links;
 mod scrape;
 mod scraper;
-use tokio;
 
-use crate::scraper::{massive_scrape, testing, testing_async};
+use crate::scraper::{testing, testing_async};
+use std::sync::Mutex;
+use tauri::Manager;
+
+#[derive(Default)]
+struct AppState {
+    counter: u32,
+}
 
 fn main() {
     //let _ = massive_scrape();
 
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet, test])
+        .plugin(tauri_plugin_store::Builder::new().build())
+        .setup(|app| {
+            app.manage(Mutex::new(AppState::default()));
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![increment_counter])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -33,4 +44,11 @@ fn test() -> String {
 #[tauri::command]
 async fn test_async() -> String {
     testing_async()
+}
+
+#[tauri::command]
+fn increment_counter(state: tauri::State<'_, Mutex<AppState>>) -> u32 {
+    let mut state = state.lock().unwrap();
+    state.counter += 1;
+    state.counter
 }
