@@ -32,7 +32,7 @@ function increment() {
     .catch((e) => console.error(e))
 }
 
-import { commands } from '../../bindings' // This should point to the file we export from Rust
+import { commands } from '@/bindings' // This should point to the file we export from Rust
 
 async function helloWorld() {
   console.log(
