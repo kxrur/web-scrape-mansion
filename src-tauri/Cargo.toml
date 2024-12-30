@@ -18,7 +18,7 @@ tauri-build = { version = "2.0.2", features = [] }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
-tauri = { version = "2.1.0", features = [] }
+tauri = { version = "2.0.0-rc.15", features = [] }
 tauri-plugin-log = "2.0.0-rc"
 thirtyfour = "0.32.0"
 tokio = "1.38.0"
@@ -33,3 +33,6 @@ dotenv_codegen = "0.15.0"
 dotenv = "0.15.0"
 async-recursion = "1.1.1"
 tauri-plugin-store = "2"
+specta = "=2.0.0-rc.20"
+specta-typescript = "0.0.7"
+tauri-specta = { version = "=2.0.0-rc.20", features = ["derive", "typescript"] }

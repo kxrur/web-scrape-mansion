@@ -17,17 +17,54 @@ use tauri::Manager;
 struct AppState {
     counter: u32,
 }
+use serde::{Deserialize, Serialize};
+use specta::Type;
+use specta_typescript::Typescript;
+use tauri_specta::{collect_commands, Builder};
+
+#[derive(Serialize, Deserialize, Type)]
+struct House {
+    rooms: u32,
+    name: String,
+    floors: u32,
+}
+#[derive(Serialize, Deserialize, Type)]
+struct Person {
+    dream_rooms: u32,
+    name: String,
+    dream_floors: u32,
+}
+
+#[tauri::command]
+#[specta::specta] // < You must annotate your commands
+fn hello_world(person: Person) -> House {
+    House {
+        rooms: person.dream_rooms,
+        name: person.name,
+        floors: person.dream_floors,
+    }
+}
 
 fn main() {
     //let _ = massive_scrape();
 
+    let mut builder = Builder::<tauri::Wry>::new()
+        // Then register them (separated by a comma)
+        .commands(collect_commands![hello_world,]);
+
+    #[cfg(debug_assertions)] // <- Only export on non-release builds
+    builder
+        .export(Typescript::default(), "../src/bindings.ts")
+        .expect("Failed to export typescript bindings");
+
     tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::new().build())
-        .setup(|app| {
+        .invoke_handler(builder.invoke_handler())
+        .setup(move |app| {
+            builder.mount_events(app);
             app.manage(Mutex::new(AppState::default()));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![increment_counter])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
