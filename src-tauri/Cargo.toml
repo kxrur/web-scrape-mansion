@@ -28,7 +28,6 @@ reqwest = { version = "0.12.5", features = ["blocking"] }
 scraper = "0.20.0"
 regex = "1.10.6"
 base64 = "0.22.1"
-mysql = "25.0.1"
 dotenv_codegen = "0.15.0"
 dotenv = "0.15.0"
 async-recursion = "1.1.1"
@@ -36,3 +35,4 @@ tauri-plugin-store = "2"
 specta = "=2.0.0-rc.20"
 specta-typescript = "0.0.7"
 tauri-specta = { version = "=2.0.0-rc.20", features = ["derive", "typescript"] }
+diesel = { version = "2.2.4", features = ["postgres"] }
