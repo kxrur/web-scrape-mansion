@@ -48,7 +48,7 @@ fn hello_world(person: Person) -> House {
 fn main() {
     //let _ = massive_scrape();
 
-    let mut builder = Builder::<tauri::Wry>::new()
+    let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
         .commands(collect_commands![hello_world,]);
 

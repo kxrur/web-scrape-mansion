@@ -10,8 +10,6 @@ use crate::scrape::scrape::{
     eval_address, eval_imgs, eval_price, eval_room, eval_size, eval_type, ADDRESS1_CS, ADDRESS2_CS,
 };
 
-use crate::database::sql::{establish_pool, pull, push, some_mansions, Mansion};
-
 #[tokio::main]
 pub async fn testing_async() -> String {
     "async_imagees".to_string()
@@ -24,7 +22,6 @@ pub fn testing() -> String {
 #[tokio::main]
 pub async fn massive_scrape() -> Result<(), Box<dyn Error + Send + Sync>> {
     dotenv().ok();
-    let _pool = establish_pool();
 
     let file_path = "bookmarks.html";
     let all_links = extract_savills_urls(file_path);
