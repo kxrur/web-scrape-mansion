@@ -8,6 +8,14 @@
 - run `diesel migration generate --diff-schema <migration_name>`
 - run `diesel migration run`
 
+### If write a `*.sql` file first
+
+This isn't perfect and will likely require a review
+
+- run `diesel migration run`
+- run `diesel_ext --model -t > src/database/models.rs` to generate the
+  `schema.rs` file
+
 ## postgresql CLI
 
 - `\dt <table>` shows table info

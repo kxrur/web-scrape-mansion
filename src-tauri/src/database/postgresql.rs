@@ -15,11 +15,9 @@ pub fn establish_connection() -> PgConnection {
         .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
 
-pub fn create_mansion(conn: &mut PgConnection, street: &str, sold: &bool) -> Mansion {
-    let new_post = NewMansion { street, sold };
-
+pub fn create_mansion(conn: &mut PgConnection, new_mansion: NewMansion) -> Mansion {
     diesel::insert_into(mansions::table)
-        .values(&new_post)
+        .values(&new_mansion)
         .returning(Mansion::as_returning())
         .get_result(conn)
         .expect("Error saving new mansion")
@@ -31,7 +29,6 @@ pub fn read_mansions() {
     let connection = &mut establish_connection();
 
     let results = mansions
-        .filter(sold.eq(true))
         .limit(5)
         .select(Mansion::as_select())
         .load(connection)
@@ -39,7 +36,7 @@ pub fn read_mansions() {
 
     println!("Displaying {} mansions", results.len());
     for mansion in results {
-        println!("{}", mansion.street);
+        println!("{}", mansion.address);
         print!("-----------");
         println!("{}", mansion.id);
     }
@@ -48,15 +45,20 @@ pub fn read_mansions() {
 pub fn test_postsql() {
     let connection = &mut establish_connection();
 
-    let mut street = String::new();
-    let sold = true;
+    let street = "some street";
 
-    println!("What would you like your street to be?");
-    stdin().read_line(&mut street).unwrap();
-    let street = street.trim_end(); // Remove the trailing newline
-
-    let post = create_mansion(connection, street, &sold);
-    println!("\nSaved mansion {street} with id {}", post.id);
+    let mansion = create_mansion(connection, {
+        NewMansion {
+            address: street.to_string(),
+            price: "987$".to_string(),
+            size: "123 sq ft".to_string(),
+            bedrooms: 1,
+            bathrooms: 2,
+            receptions: 3,
+            type_: "castle".to_string(),
+        }
+    });
+    println!("\nSaved mansion {street} with id {}", mansion.id);
 
     read_mansions()
 }
