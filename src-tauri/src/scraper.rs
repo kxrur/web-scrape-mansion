@@ -29,13 +29,13 @@ pub async fn massive_scrape() -> Result<(), Box<dyn Error + Send + Sync>> {
 
     //Driver::Chrome.install();
 
-    //command: chromedriver  (need the chromium package)
+    //command: chromedriver --port=44444  (need the chromium package)
 
     match all_links {
         Ok(urls) => {
             let caps = DesiredCapabilities::chrome();
             //caps.add_arg("--headless=new")?; // hide the browser
-            let driver = WebDriver::new("http://localhost:35649", caps)
+            let driver = WebDriver::new("http://localhost:44444", caps)
                 .await
                 .expect("Failed to load driver");
             //FIXME: make sure url is unique (have duplicates in data)
