@@ -2,7 +2,10 @@ use regex::Regex;
 use reqwest::Client;
 use thirtyfour::prelude::*;
 
-use crate::scrape::save::{download_image, save_data_url_as_image};
+use crate::scrape::{
+    action::close_cookie,
+    save::{download_image, save_data_url_as_image},
+};
 
 use super::save::recursive_rename;
 
@@ -16,14 +19,120 @@ pub const TYPE_CS: &str = "sv-property-intro-footer__group:nth-child(1) > div:nt
 pub const GALLERY_BLOCK: &str = "Gallerystyled__LeadGalleryContent-sc-h7kctk-1";
 pub const GALLERY_IMG: &str = "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0";
 
-pub async fn eval_address(driver: &WebDriver, class_name: &str) -> Result<String, WebDriverError> {
+pub struct Mansionee {
+    address: String,
+    price: Option<i32>,
+    size: Option<f64>,
+    bedrooms: Option<i32>,
+    bathrooms: Option<i32>,
+    receptions: Option<i32>,
+    house_type: String,
+}
+
+impl Mansionee {
+    pub fn new(
+        address: String,
+        price: Option<i32>,
+        size: Option<f64>,
+        bedrooms: Option<i32>,
+        bathrooms: Option<i32>,
+        receptions: Option<i32>,
+        house_type: String,
+    ) -> Self {
+        Self {
+            address,
+            price,
+            size,
+            bedrooms,
+            bathrooms,
+            receptions,
+            house_type,
+        }
+    }
+    pub fn log(&self) {
+        println!(
+            "Here is a mansion: 
+            Address: {}
+            Price: {} 
+            Size: {} sqm
+            Bedrooms: {} 
+            Bathrooms: {} 
+            Receptions: {} 
+            Type: {}",
+            self.address,
+            self.price.map_or("N/A".to_string(), |p| format!("${}", p)),
+            self.size.map_or("N/A".to_string(), |s| format!("{:.2}", s)),
+            self.bedrooms.map_or("N/A".to_string(), |b| b.to_string()),
+            self.bathrooms.map_or("N/A".to_string(), |b| b.to_string()),
+            self.receptions.map_or("N/A".to_string(), |r| r.to_string()),
+            self.house_type
+        );
+    }
+}
+
+pub async fn setup_driver(server_url: String) -> WebDriver {
+    //command: chromedriver --port=44444  (need the chromium package)
+    let caps = DesiredCapabilities::chrome();
+    //caps.add_arg("--headless=new")?; // hide the browser
+    WebDriver::new(server_url, caps)
+        .await
+        .expect("Failed to load driver")
+}
+
+pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<(Mansionee)> {
+    println!("{}", url);
+    driver.goto(&url).await?;
+    close_cookie(driver, &url).await;
+
+    if let Ok(address1) = eval_address(driver, ADDRESS1_CS).await {
+        let address2 = eval_address(driver, ADDRESS2_CS).await?;
+        let full_address = format!("{} {}", address1, address2);
+        println!("full address: {}", full_address);
+        let price = match eval_price(driver).await {
+            Ok(it) => Some(it),
+            Err(_) => {
+                println!("No price found");
+                None
+            }
+        };
+        let size = match eval_size(driver).await {
+            Ok(it) => Some(it),
+            Err(_e) => {
+                println!("did not find size item");
+                None
+            }
+        };
+
+        let (bedrooms, bathrooms, receptions) = eval_room(driver).await?;
+
+        let house_type = eval_type(driver).await?;
+
+        let mansion = Mansionee::new(
+            full_address,
+            price,
+            size,
+            bedrooms,
+            bathrooms,
+            receptions,
+            house_type,
+        );
+        mansion.log();
+        eval_imgs(driver, &address1).await;
+
+        Ok(mansion)
+    } else {
+        Err(WebDriverError::NotFound(url, "".to_string()))
+    }
+}
+
+async fn eval_address(driver: &WebDriver, class_name: &str) -> Result<String, WebDriverError> {
     let elem_address = driver.find(By::ClassName(class_name)).await?;
     let address = elem_address.text().await?.split('\n').take(1).collect(); //TODO: find
                                                                             //better way to get the first line only
     println!("address: {}\n end", address);
     Ok(address)
 }
-pub async fn eval_price(driver: &WebDriver) -> Result<i32, WebDriverError> {
+async fn eval_price(driver: &WebDriver) -> Result<i32, WebDriverError> {
     let elem_price = driver.find(By::ClassName(PRICE_CS)).await?;
     let mut price_str = elem_price.text().await?;
 
@@ -46,7 +155,7 @@ pub async fn eval_price(driver: &WebDriver) -> Result<i32, WebDriverError> {
     Ok(price)
 }
 
-pub async fn eval_size(driver: &WebDriver) -> Result<f64, WebDriverError> {
+async fn eval_size(driver: &WebDriver) -> Result<f64, WebDriverError> {
     let elem_size = driver.find(By::ClassName(SIZE_CS)).await?;
     let mut size_str = elem_size.text().await?;
     size_str.retain(|c| c != ',');
@@ -61,7 +170,7 @@ pub async fn eval_size(driver: &WebDriver) -> Result<f64, WebDriverError> {
     Ok(size)
 }
 
-pub async fn eval_room(
+async fn eval_room(
     driver: &WebDriver,
 ) -> Result<(Option<i32>, Option<i32>, Option<i32>), WebDriverError> {
     let (mut room, mut bath, mut rec): (Option<i32>, Option<i32>, Option<i32>) = (None, None, None);
@@ -98,7 +207,7 @@ pub async fn eval_room(
     Ok((room, bath, rec))
 }
 
-pub async fn eval_type(driver: &WebDriver) -> Result<String, WebDriverError> {
+async fn eval_type(driver: &WebDriver) -> Result<String, WebDriverError> {
     let elem_address = driver.find(By::ClassName(TYPE_CS)).await?;
     let house_type = elem_address.text().await?;
 
@@ -106,7 +215,7 @@ pub async fn eval_type(driver: &WebDriver) -> Result<String, WebDriverError> {
     Ok(house_type)
 }
 
-pub async fn eval_imgs(driver: &WebDriver, address1: &String) {
+async fn eval_imgs(driver: &WebDriver, address1: &String) {
     let elem_image_gallery_block = driver
         .find(By::ClassName(GALLERY_BLOCK))
         .await

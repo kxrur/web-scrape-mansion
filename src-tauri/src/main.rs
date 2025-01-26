@@ -9,9 +9,7 @@ mod links;
 mod scrape;
 mod scraper;
 
-use crate::scraper::{testing, testing_async};
-use database::postgresql::test_postsql;
-use scraper::massive_scrape;
+use scraper::{test_massive_scrape, test_single_scrape};
 use std::sync::Mutex;
 use tauri::Manager;
 
@@ -48,9 +46,9 @@ fn hello_world(person: Person) -> House {
 }
 
 fn main() {
-    let _ = massive_scrape();
-    //test_postsql();
-
+    //let _ = test_single_scrape();
+    let _ = test_massive_scrape();
+    println!("done");
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
         .commands(collect_commands![hello_world,]);
@@ -73,17 +71,8 @@ fn main() {
 }
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-fn greet(name: &str) -> String {
+fn _greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
-}
-#[tauri::command]
-fn test() -> String {
-    testing()
-}
-
-#[tauri::command]
-async fn test_async() -> String {
-    testing_async()
 }
 
 #[tauri::command]
