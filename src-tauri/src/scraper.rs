@@ -23,19 +23,21 @@ pub fn testing() -> String {
 pub async fn massive_scrape() -> Result<(), Box<dyn Error + Send + Sync>> {
     dotenv().ok();
 
-    let file_path = "bookmarks.html";
+    let file_path = "src/bookmarks.html";
     let all_links = extract_savills_urls(file_path);
     delete_all_imgs("images");
 
     //Driver::Chrome.install();
 
-    //command: chromedriver
+    //command: chromedriver  (need the chromium package)
 
     match all_links {
         Ok(urls) => {
             let caps = DesiredCapabilities::chrome();
             //caps.add_arg("--headless=new")?; // hide the browser
-            let driver = WebDriver::new("http://localhost:33385", caps).await?;
+            let driver = WebDriver::new("http://localhost:35649", caps)
+                .await
+                .expect("Failed to load driver");
             //FIXME: make sure url is unique (have duplicates in data)
             for (i, url) in urls.iter().enumerate() {
                 println!("{}", url);
@@ -75,7 +77,7 @@ pub async fn massive_scrape() -> Result<(), Box<dyn Error + Send + Sync>> {
             driver.quit().await?;
         }
         Err(e) => {
-            eprintln!("Error: {}", e);
+            eprintln!("Invalid URLs: {}", e);
         }
     }
     Ok(()) // full run with current addresses took 5m47s

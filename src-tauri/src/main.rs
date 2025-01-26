@@ -11,6 +11,7 @@ mod scraper;
 
 use crate::scraper::{testing, testing_async};
 use database::postgresql::test_postsql;
+use scraper::massive_scrape;
 use std::sync::Mutex;
 use tauri::Manager;
 
@@ -47,8 +48,8 @@ fn hello_world(person: Person) -> House {
 }
 
 fn main() {
-    //let _ = massive_scrape();
-    test_postsql();
+    let _ = massive_scrape();
+    //test_postsql();
 
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)

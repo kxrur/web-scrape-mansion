@@ -26,6 +26,5 @@ pub fn extract_savills_urls(file_path: &str) -> Result<Vec<String>, Box<dyn std:
             }
         }
     }
-
     Ok(urls)
 }
