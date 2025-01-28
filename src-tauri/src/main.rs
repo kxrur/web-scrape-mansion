@@ -47,7 +47,7 @@ fn hello_world(person: Person) -> House {
 
 fn main() {
     //let _ = test_single_scrape();
-    //let _ = test_massive_scrape();
+    let _ = test_massive_scrape();
     println!("done");
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
