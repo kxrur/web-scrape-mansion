@@ -1,21 +1,30 @@
 <template>
-  <v-container class="bg-surface-variant fill-height">
-    <v-responsive
-      class="align-centerfill-height"
-      max-width="2000"
-      min-width="1600"
-    >
+  <v-container class="fill-height">
+    <v-responsive class="align-center fill-height">
       <v-row no-gutters>
-        <v-col>
-          <v-sheet class="pa-2 ma-2"> image </v-sheet>
+        <v-col sm="4" md="6" lg="8">
+          <v-carousel show-arrows="hover">
+            <v-carousel-item
+              v-for="(image, index) in images"
+              :key="index"
+              :src="image"
+              cover
+            />
+          </v-carousel>
         </v-col>
 
         <v-col cols="4">
-          <v-sheet class="pa-2 ma-2"> desc </v-sheet>
+          <v-sheet class="pa-2 ma-2">desc</v-sheet>
         </v-col>
       </v-row>
     </v-responsive>
   </v-container>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const images = [
+  'https://cdn.vuetifyjs.com/images/cards/docks.jpg',
+  'https://cdn.vuetifyjs.com/images/cards/hotel.jpg',
+  'https://cdn.vuetifyjs.com/images/cards/sunshine.jpg',
+]
+</script>
