@@ -9,13 +9,15 @@ mod links;
 mod scrape;
 mod scraper;
 
-use scraper::{test_massive_scrape, test_single_scrape};
+use scrape::scrape::Mansionee;
+use scraper::{test_massive_scrape, test_scrape_mansions};
 use std::sync::Mutex;
 use tauri::Manager;
 
 #[derive(Default)]
 struct AppState {
     counter: u32,
+    Mansions: Vec<Mansionee>,
 }
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -46,12 +48,30 @@ fn hello_world(person: Person) -> House {
 }
 
 fn main() {
-    //let _ = test_single_scrape();
-    let _ = test_massive_scrape();
-    println!("done");
+    let n = 2;
+    match n {
+        1 => {
+            let _ = test_scrape_mansions(vec![
+                "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
+            ]);
+        }
+        2 => {
+            let _ = test_scrape_mansions(vec![
+                "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
+                "https://search.savills.com/property-detail/gbslaklai220042".to_string(),
+                "https://search.savills.com/property-detail/gbslaklak200005".to_string(),
+            ]);
+        }
+        3 => {
+            let _ = test_massive_scrape();
+        }
+        _ => {
+            println!("No data is scraped");
+        }
+    }
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
-        .commands(collect_commands![hello_world,]);
+        .commands(collect_commands![hello_world, increment_counter]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
     builder
@@ -76,6 +96,7 @@ fn _greet(name: &str) -> String {
 }
 
 #[tauri::command]
+#[specta::specta] // < You must annotate your commands
 fn increment_counter(state: tauri::State<'_, Mutex<AppState>>) -> u32 {
     let mut state = state.lock().unwrap();
     state.counter += 1;

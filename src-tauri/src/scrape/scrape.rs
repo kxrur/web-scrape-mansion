@@ -27,6 +27,12 @@ pub struct Mansionee {
     bathrooms: Option<i32>,
     receptions: Option<i32>,
     house_type: String,
+    pictures: Vec<Picture>,
+}
+#[derive(Debug)]
+pub struct Picture {
+    path: String,
+    name: String,
 }
 
 impl Mansionee {
@@ -38,6 +44,7 @@ impl Mansionee {
         bathrooms: Option<i32>,
         receptions: Option<i32>,
         house_type: String,
+        pictures: Vec<Picture>,
     ) -> Self {
         Self {
             address,
@@ -47,6 +54,7 @@ impl Mansionee {
             bathrooms,
             receptions,
             house_type,
+            pictures,
         }
     }
     pub fn log(&self) {
@@ -58,14 +66,16 @@ impl Mansionee {
             Bedrooms: {} 
             Bathrooms: {} 
             Receptions: {} 
-            Type: {}",
+            Type: {}
+            Pictures:{:?}",
             self.address,
             self.price.map_or("N/A".to_string(), |p| format!("${}", p)),
             self.size.map_or("N/A".to_string(), |s| format!("{:.2}", s)),
             self.bedrooms.map_or("N/A".to_string(), |b| b.to_string()),
             self.bathrooms.map_or("N/A".to_string(), |b| b.to_string()),
             self.receptions.map_or("N/A".to_string(), |r| r.to_string()),
-            self.house_type
+            self.house_type,
+            self.pictures
         );
     }
 }
@@ -107,6 +117,7 @@ pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<
 
         let house_type = eval_type(driver).await?;
 
+        let pictures = eval_imgs(driver, &address1).await;
         let mansion = Mansionee::new(
             full_address,
             price,
@@ -115,9 +126,9 @@ pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<
             bathrooms,
             receptions,
             house_type,
+            pictures,
         );
         mansion.log();
-        eval_imgs(driver, &address1).await;
 
         Ok(mansion)
     } else {
@@ -215,7 +226,8 @@ async fn eval_type(driver: &WebDriver) -> Result<String, WebDriverError> {
     Ok(house_type)
 }
 
-async fn eval_imgs(driver: &WebDriver, address1: &String) {
+async fn eval_imgs(driver: &WebDriver, address1: &String) -> Vec<Picture> {
+    let mut all_img_file_paths: Vec<Picture> = Vec::new();
     let elem_image_gallery_block = driver
         .find(By::ClassName(GALLERY_BLOCK))
         .await
@@ -252,6 +264,11 @@ async fn eval_imgs(driver: &WebDriver, address1: &String) {
 
         let foldername = remove_spaces(address1.clone());
         let file_path = recursive_rename(&format!("images/{}/{}.jpg", foldername, &name)).await;
+        let picture = Picture {
+            path: format!("images/{}/{}.jpg", foldername, &name),
+            name,
+        };
+        all_img_file_paths.push(picture);
 
         if src.starts_with("data:") {
             println!("Data URL found: {}", src);
@@ -264,6 +281,7 @@ async fn eval_imgs(driver: &WebDriver, address1: &String) {
                 .expect("src URL did not save");
         }
     }
+    all_img_file_paths
 }
 fn remove_spaces(txt: String) -> String {
     txt.trim().replace(' ', "_")
