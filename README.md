@@ -86,3 +86,10 @@ This project is built with [Vuetify](https://vuetifyjs.com/en/), a UI Library wi
       url - _too much recursion_). Look at the `*FIXME.vue` components
 
 Copyright (c) 2016-present Vuetify, LLC
+
+## Dependencies Packages
+
+- Chromium
+  - used for the `chromedriver --port=44444` server
+- PostgreSQL
+  - always required
