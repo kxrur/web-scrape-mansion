@@ -7,6 +7,12 @@
 export const commands = {
 async helloWorld(person: Person) : Promise<House> {
     return await TAURI_INVOKE("hello_world", { person });
+},
+async incrementCounter() : Promise<number> {
+    return await TAURI_INVOKE("increment_counter");
+},
+async loadMansions() : Promise<Mansionee[]> {
+    return await TAURI_INVOKE("load_mansions");
 }
 }
 
@@ -21,7 +27,9 @@ async helloWorld(person: Person) : Promise<House> {
 /** user-defined types **/
 
 export type House = { rooms: number; name: string; floors: number }
+export type Mansionee = { address: string; price: number | null; size: number | null; bedrooms: number | null; bathrooms: number | null; receptions: number | null; house_type: string; pictures: Picture[] }
 export type Person = { dream_rooms: number; name: string; dream_floors: number }
+export type Picture = { path: string; name: string }
 
 /** tauri-specta globals **/
 

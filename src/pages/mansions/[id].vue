@@ -1,5 +1,5 @@
 <template>
-  <MansionInfo />
+  <Mansion />
 </template>
 
 <script lang="ts" setup>

@@ -9,6 +9,7 @@ mod links;
 mod scrape;
 mod scraper;
 
+use database::schema::mansions;
 use scrape::scrape::Mansionee;
 use scraper::{test_massive_scrape, test_scrape_mansions};
 use std::sync::Mutex;
@@ -48,30 +49,13 @@ fn hello_world(person: Person) -> House {
 }
 
 fn main() {
-    let n = 2;
-    match n {
-        1 => {
-            let _ = test_scrape_mansions(vec![
-                "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
-            ]);
-        }
-        2 => {
-            let _ = test_scrape_mansions(vec![
-                "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
-                "https://search.savills.com/property-detail/gbslaklai220042".to_string(),
-                "https://search.savills.com/property-detail/gbslaklak200005".to_string(),
-            ]);
-        }
-        3 => {
-            let _ = test_massive_scrape();
-        }
-        _ => {
-            println!("No data is scraped");
-        }
-    }
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
-        .commands(collect_commands![hello_world, increment_counter]);
+        .commands(collect_commands![
+            hello_world,
+            increment_counter,
+            load_mansions
+        ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
     builder
@@ -93,6 +77,31 @@ fn main() {
 #[tauri::command]
 fn _greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
+}
+
+#[tauri::command]
+#[specta::specta] // < You must annotate your commands
+fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Vec<Mansionee> {
+    let mut state = state.lock().unwrap();
+    let n = 2;
+    let mansions = match n {
+        1 => test_scrape_mansions(vec![
+            "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
+        ]),
+
+        2 => test_scrape_mansions(vec![
+            "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
+            "https://search.savills.com/property-detail/gbslaklai220042".to_string(),
+            "https://search.savills.com/property-detail/gbslaklak200005".to_string(),
+        ]),
+        // 3 => Some(test_massive_scrape()),
+        _ => {
+            println!("No data is scraped");
+            test_scrape_mansions(vec!["".to_string()])
+        }
+    };
+    state.Mansions = mansions.unwrap_or_else(|_| Vec::new());
+    state.Mansions.clone()
 }
 
 #[tauri::command]

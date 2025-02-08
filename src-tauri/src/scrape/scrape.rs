@@ -1,5 +1,7 @@
 use regex::Regex;
 use reqwest::Client;
+use serde::{Deserialize, Serialize};
+use specta::Type;
 use thirtyfour::prelude::*;
 
 use crate::scrape::{
@@ -19,6 +21,7 @@ pub const TYPE_CS: &str = "sv-property-intro-footer__group:nth-child(1) > div:nt
 pub const GALLERY_BLOCK: &str = "Gallerystyled__LeadGalleryContent-sc-h7kctk-1";
 pub const GALLERY_IMG: &str = "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0";
 
+#[derive(Serialize, Deserialize, Type, Clone)]
 pub struct Mansionee {
     address: String,
     price: Option<i32>,
@@ -29,7 +32,7 @@ pub struct Mansionee {
     house_type: String,
     pictures: Vec<Picture>,
 }
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize, Type, Clone)]
 pub struct Picture {
     path: String,
     name: String,
