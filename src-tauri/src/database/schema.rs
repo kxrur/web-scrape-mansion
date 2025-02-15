@@ -1,30 +1,15 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    images (id) {
-        id -> Int4,
-        image_path -> Text,
-        mansion_id -> Int4,
-    }
-}
-
-diesel::table! {
-    mansions (id) {
+    mansionees (id) {
         id -> Int4,
         address -> Text,
-        price -> Text,
-        size -> Text,
-        bedrooms -> Int4,
-        bathrooms -> Int4,
-        receptions -> Int4,
-        #[sql_name = "type"]
-        type_ -> Text,
+        price -> Nullable<Int4>,
+        size -> Nullable<Float8>,
+        bedrooms -> Nullable<Int4>,
+        bathrooms -> Nullable<Int4>,
+        receptions -> Nullable<Int4>,
+        house_type -> Text,
+        pictures -> Nullable<Jsonb>,
     }
 }
-
-diesel::joinable!(images -> mansions (mansion_id));
-
-diesel::allow_tables_to_appear_in_same_query!(
-    images,
-    mansions,
-);

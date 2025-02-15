@@ -35,4 +35,4 @@ tauri-plugin-store = "2"
 specta = "=2.0.0-rc.20"
 specta-typescript = "0.0.7"
 tauri-specta = { version = "=2.0.0-rc.20", features = ["derive", "typescript"] }
-diesel = { version = "2.2.4", features = ["postgres"] }
+diesel = { version = "2.2.4", features = ["postgres", "serde_json"] }

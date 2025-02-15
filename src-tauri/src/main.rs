@@ -9,7 +9,6 @@ mod links;
 mod scrape;
 mod scraper;
 
-use database::schema::mansions;
 use scrape::scrape::Mansionee;
 use scraper::{test_massive_scrape, test_scrape_mansions};
 use std::sync::Mutex;
@@ -49,13 +48,15 @@ fn hello_world(person: Person) -> House {
 }
 
 fn main() {
+    let _ = test_scrape_mansions(vec![
+        "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
+        "https://search.savills.com/property-detail/gbslaklai220042".to_string(),
+        "https://search.savills.com/property-detail/gbslaklak200005".to_string(),
+    ]);
+
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
-        .commands(collect_commands![
-            hello_world,
-            increment_counter,
-            load_mansions
-        ]);
+        .commands(collect_commands![hello_world, increment_counter]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
     builder

@@ -2,7 +2,6 @@ use dotenv::dotenv;
 use std::error::Error;
 use thirtyfour::prelude::*;
 
-use crate::database::schema::mansions;
 use crate::links::extract_savills_urls;
 
 use crate::scrape::scrape::{scrape_mansion, setup_driver, Mansionee};

@@ -1,15 +1,17 @@
 use regex::Regex;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use thirtyfour::prelude::*;
 
+use crate::database::postgresql::save_mansionee;
+use crate::database::schema::mansionees;
 use crate::scrape::{
     action::close_cookie,
     save::{download_image, save_data_url_as_image},
 };
 
 use super::save::recursive_rename;
+use diesel::prelude::*;
 
 pub const ADDRESS1_CS: &str = "sv-property-intro__address-line-1";
 pub const ADDRESS2_CS: &str = "sv-property-intro__address-line-2";
@@ -21,21 +23,24 @@ pub const TYPE_CS: &str = "sv-property-intro-footer__group:nth-child(1) > div:nt
 pub const GALLERY_BLOCK: &str = "Gallerystyled__LeadGalleryContent-sc-h7kctk-1";
 pub const GALLERY_IMG: &str = "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0";
 
-#[derive(Serialize, Deserialize, Type, Clone)]
+#[derive(Serialize, Deserialize, Clone, Queryable, Insertable, Selectable)]
+#[diesel(table_name = mansionees)]
 pub struct Mansionee {
-    address: String,
-    price: Option<i32>,
-    size: Option<f64>,
-    bedrooms: Option<i32>,
-    bathrooms: Option<i32>,
-    receptions: Option<i32>,
-    house_type: String,
-    pictures: Vec<Picture>,
+    pub id: i32,
+    pub address: String,
+    pub price: Option<i32>,
+    pub size: Option<f64>,
+    pub bedrooms: Option<i32>,
+    pub bathrooms: Option<i32>,
+    pub receptions: Option<i32>,
+    pub house_type: String,
+    pub pictures: Option<serde_json::Value>, // Use serde_json::Value for Jsonb
 }
-#[derive(Debug, Serialize, Deserialize, Type, Clone)]
+
+#[derive(Serialize, Deserialize, Clone, Queryable)]
 pub struct Picture {
-    path: String,
-    name: String,
+    pub path: String,
+    pub name: String,
 }
 
 impl Mansionee {
@@ -49,7 +54,9 @@ impl Mansionee {
         house_type: String,
         pictures: Vec<Picture>,
     ) -> Self {
-        Self {
+        let pictures_json = serde_json::to_value(pictures).ok();
+        Mansionee {
+            id: 0,
             address,
             price,
             size,
@@ -57,7 +64,7 @@ impl Mansionee {
             bathrooms,
             receptions,
             house_type,
-            pictures,
+            pictures: pictures_json,
         }
     }
     pub fn log(&self) {
@@ -132,6 +139,9 @@ pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<
             pictures,
         );
         mansion.log();
+
+        let mansionee = save_mansionee(mansion.clone());
+        mansionee.log();
 
         Ok(mansion)
     } else {
