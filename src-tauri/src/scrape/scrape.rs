@@ -26,7 +26,6 @@ pub const GALLERY_IMG: &str = "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0
 #[derive(Serialize, Deserialize, Clone, Queryable, Insertable, Selectable)]
 #[diesel(table_name = mansionees)]
 pub struct Mansionee {
-    pub id: i32,
     pub address: String,
     pub price: Option<i32>,
     pub size: Option<f64>,
@@ -56,7 +55,6 @@ impl Mansionee {
     ) -> Self {
         let pictures_json = serde_json::to_value(pictures).ok();
         Mansionee {
-            id: 0,
             address,
             price,
             size,
