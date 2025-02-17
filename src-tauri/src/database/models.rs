@@ -5,10 +5,11 @@
 
 use super::schema::mansionees;
 use diesel::prelude::*;
-#[derive(Queryable, Selectable, Debug, Insertable)]
+use serde::{Deserialize, Serialize};
+use specta::Type;
+#[derive(Serialize, Deserialize, Queryable, Selectable, Debug, Insertable, Clone, Type)]
 #[diesel(table_name = mansionees)]
 pub struct Mansionee {
-    pub id: i32,
     pub address: String,
     pub price: Option<i32>,
     pub size: Option<f64>,
@@ -16,5 +17,6 @@ pub struct Mansionee {
     pub bathrooms: Option<i32>,
     pub receptions: Option<i32>,
     pub house_type: String,
+    #[specta(skip)] // Skip the field if it can't be easily converted. FIXME: could cause issues
     pub pictures: Option<serde_json::Value>,
 }

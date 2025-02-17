@@ -1,17 +1,20 @@
-use dotenv::dotenv;
-use std::error::Error;
 use thirtyfour::prelude::*;
 
+use crate::database::models::Mansionee;
 use crate::links::extract_savills_urls;
 
-use crate::scrape::scrape::{scrape_mansion, setup_driver, Mansionee};
+use crate::scrape::errors::Error;
+use crate::scrape::scrape::{scrape_mansion, setup_driver};
 
 #[tokio::main]
-pub async fn test_scrape_mansions(links: Vec<String>) -> WebDriverResult<Vec<Mansionee>> {
+pub async fn test_scrape_mansions(links: Vec<String>) -> Result<Vec<Mansionee>, Error> {
     delete_all_imgs("images");
     let driver = setup_driver("http://localhost:44444".to_string()).await;
     let mansions = scrape_mansions(&driver, links).await;
-    driver.quit().await?;
+    match driver.quit().await {
+        Ok(_) => println!("Quit driver successfully"),
+        Err(e) => println!("{}", e),
+    };
     Ok(mansions)
 }
 

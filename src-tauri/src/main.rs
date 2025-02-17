@@ -9,7 +9,8 @@ mod links;
 mod scrape;
 mod scraper;
 
-use scrape::scrape::Mansionee;
+use database::models::Mansionee;
+use scrape::errors::Error;
 use scraper::{test_massive_scrape, test_scrape_mansions};
 use std::sync::Mutex;
 use tauri::Manager;
@@ -56,7 +57,11 @@ fn main() {
 
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
-        .commands(collect_commands![hello_world, increment_counter]);
+        .commands(collect_commands![
+            hello_world,
+            increment_counter,
+            load_mansions
+        ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
     builder
@@ -82,7 +87,7 @@ fn _greet(name: &str) -> String {
 
 #[tauri::command]
 #[specta::specta] // < You must annotate your commands
-fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Vec<Mansionee> {
+fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<Mansionee>, Error> {
     let mut state = state.lock().unwrap();
     let n = 2;
     let mansions = match n {
@@ -101,8 +106,8 @@ fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Vec<Mansionee> {
             test_scrape_mansions(vec!["".to_string()])
         }
     };
-    state.Mansions = mansions.unwrap_or_else(|_| Vec::new());
-    state.Mansions.clone()
+    state.Mansions = mansions?; // Propagate errors using the `?` operator
+    Ok(state.Mansions.clone())
 }
 
 #[tauri::command]

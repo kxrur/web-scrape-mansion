@@ -3,9 +3,7 @@ use std::{env, panic};
 use diesel::{Connection, PgConnection, QueryResult};
 use dotenv::dotenv;
 
-use crate::scrape::scrape::Mansionee;
-
-use super::schema::mansionees;
+use super::{models::Mansionee, schema::mansionees};
 use diesel::prelude::*;
 
 pub fn establish_connection() -> PgConnection {

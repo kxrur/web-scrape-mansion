@@ -3,8 +3,8 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
 
+use crate::database::models::Mansionee;
 use crate::database::postgresql::save_mansionee;
-use crate::database::schema::mansionees;
 use crate::scrape::{
     action::close_cookie,
     save::{download_image, save_data_url_as_image},
@@ -22,19 +22,6 @@ pub const ROOMS_CS: &str = "sv-property-intro-footer__group:nth-child(2)";
 pub const TYPE_CS: &str = "sv-property-intro-footer__group:nth-child(1) > div:nth-child(1)";
 pub const GALLERY_BLOCK: &str = "Gallerystyled__LeadGalleryContent-sc-h7kctk-1";
 pub const GALLERY_IMG: &str = "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0";
-
-#[derive(Serialize, Deserialize, Clone, Queryable, Insertable, Selectable)]
-#[diesel(table_name = mansionees)]
-pub struct Mansionee {
-    pub address: String,
-    pub price: Option<i32>,
-    pub size: Option<f64>,
-    pub bedrooms: Option<i32>,
-    pub bathrooms: Option<i32>,
-    pub receptions: Option<i32>,
-    pub house_type: String,
-    pub pictures: Option<serde_json::Value>, // Use serde_json::Value for Jsonb
-}
 
 #[derive(Serialize, Deserialize, Clone, Queryable)]
 pub struct Picture {
