@@ -1,7 +1,14 @@
 <template>
   <v-col cols="4">
     <v-sheet class="pa-4 ma-2">
-      <v-list v-if="mansion">
+      <template v-if="!mansion">
+        <!-- Skeleton Loader -->
+        <v-skeleton-loader
+          type="list-item-avatar-two-line, list-item-two-line, list-item-two-line, list-item-two-line, list-item-two-line"
+        ></v-skeleton-loader>
+      </template>
+
+      <v-list v-else>
         <v-list-item>
           <v-list-item-title class="text-h6">Mansion Details</v-list-item-title>
         </v-list-item>
@@ -33,7 +40,6 @@
           <v-list-item-subtitle>{{ mansion.house_type }}</v-list-item-subtitle>
         </v-list-item>
       </v-list>
-      <v-alert v-else type="info">Loading mansion details...</v-alert>
     </v-sheet>
   </v-col>
 </template>
@@ -46,10 +52,18 @@ const mansion = ref()
 
 onMounted(async () => {
   try {
-    const mansions = await commands.loadMansions()
-    mansion.value = mansions.length > 0 ? mansions[0] : null
+    console.log('start loading mansions')
+    const result = await commands.loadMansions()
+    console.log('finish loading mansions')
+
+    if (result.status === 'ok') {
+      const mansions = result.data
+      mansion.value = mansions.length > 0 ? mansions[0] : null
+    } else {
+      console.error('Error loading mansions:', result.error)
+    }
   } catch (error) {
-    console.error('Error loading mansions:', error)
+    console.error('Unexpected error:', error)
   }
 })
 </script>

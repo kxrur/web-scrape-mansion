@@ -82,7 +82,6 @@ fn _greet(name: &str) -> String {
 #[tauri::command]
 #[specta::specta] // < You must annotate your commands
 async fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<Mansionee>, Error> {
-    let mut state = state.lock().unwrap();
     let n = 1;
     let mansions = match n {
         1 => test_scrape_mansions(vec![
@@ -99,7 +98,9 @@ async fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<M
             println!("No data is scraped");
             test_scrape_mansions(vec!["".to_string()])
         }
-    };
+    }
+    .await;
+    let mut state = state.lock().unwrap();
     state.Mansions = mansions?;
     Ok(state.Mansions.clone())
 }

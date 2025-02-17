@@ -11,8 +11,13 @@ async helloWorld(person: Person) : Promise<House> {
 async incrementCounter() : Promise<number> {
     return await TAURI_INVOKE("increment_counter");
 },
-async loadMansions() : Promise<Mansionee[]> {
-    return await TAURI_INVOKE("load_mansions");
+async loadMansions() : Promise<Result<Mansionee[], Error>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("load_mansions") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -26,10 +31,10 @@ async loadMansions() : Promise<Mansionee[]> {
 
 /** user-defined types **/
 
+export type Error = { Network: string } | { Parsing: string }
 export type House = { rooms: number; name: string; floors: number }
-export type Mansionee = { address: string; price: number | null; size: number | null; bedrooms: number | null; bathrooms: number | null; receptions: number | null; house_type: string; pictures: Picture[] }
+export type Mansionee = { address: string; price: number | null; size: number | null; bedrooms: number | null; bathrooms: number | null; receptions: number | null; house_type: string }
 export type Person = { dream_rooms: number; name: string; dream_floors: number }
-export type Picture = { path: string; name: string }
 
 /** tauri-specta globals **/
 

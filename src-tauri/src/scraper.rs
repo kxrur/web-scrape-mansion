@@ -6,7 +6,6 @@ use crate::links::extract_savills_urls;
 use crate::scrape::errors::Error;
 use crate::scrape::scrape::{scrape_mansion, setup_driver};
 
-#[tokio::main]
 pub async fn test_scrape_mansions(links: Vec<String>) -> Result<Vec<Mansionee>, Error> {
     delete_all_imgs("images");
     let driver = setup_driver("http://localhost:44444".to_string()).await;
@@ -18,7 +17,6 @@ pub async fn test_scrape_mansions(links: Vec<String>) -> Result<Vec<Mansionee>, 
     Ok(mansions)
 }
 
-#[tokio::main]
 pub async fn test_massive_scrape() -> WebDriverResult<()> {
     delete_all_imgs("images");
     let driver = setup_driver("http://localhost:44444".to_string()).await;
