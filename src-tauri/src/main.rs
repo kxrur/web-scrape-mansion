@@ -49,12 +49,6 @@ fn hello_world(person: Person) -> House {
 }
 
 fn main() {
-    let _ = test_scrape_mansions(vec![
-        "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
-        "https://search.savills.com/property-detail/gbslaklai220042".to_string(),
-        "https://search.savills.com/property-detail/gbslaklak200005".to_string(),
-    ]);
-
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
         .commands(collect_commands![
@@ -87,9 +81,9 @@ fn _greet(name: &str) -> String {
 
 #[tauri::command]
 #[specta::specta] // < You must annotate your commands
-fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<Mansionee>, Error> {
+async fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<Mansionee>, Error> {
     let mut state = state.lock().unwrap();
-    let n = 2;
+    let n = 1;
     let mansions = match n {
         1 => test_scrape_mansions(vec![
             "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
@@ -106,7 +100,7 @@ fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<Mansion
             test_scrape_mansions(vec!["".to_string()])
         }
     };
-    state.Mansions = mansions?; // Propagate errors using the `?` operator
+    state.Mansions = mansions?;
     Ok(state.Mansions.clone())
 }
 
