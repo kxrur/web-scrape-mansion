@@ -1,3 +1,4 @@
+use dirs::home_dir;
 use regex::Regex;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -260,10 +261,12 @@ async fn eval_imgs(driver: &WebDriver, address1: &String) -> Vec<Picture> {
             .expect("no src attr found")
             .expect("src attr is wrong");
 
+        let database_path = format!("{}/Desktop/images", home_dir().unwrap().to_string_lossy());
         let foldername = remove_spaces(address1.clone());
-        let file_path = recursive_rename(&format!("images/{}/{}.jpg", foldername, &name)).await;
+        let file_path =
+            recursive_rename(&format!("{}/{}/{}.jpg", database_path, foldername, &name)).await;
         let picture = Picture {
-            path: format!("images/{}/{}.jpg", foldername, &name),
+            path: format!("{}/{}/{}.jpg", database_path, foldername, &name),
             name,
         };
         all_img_file_paths.push(picture);
