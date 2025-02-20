@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
+    "@tauri-apps/plugin-fs": "^2.2.0",
     "@tauri-apps/plugin-store": "^2.2.0",
     "core-js": "^3.37.1",
     "roboto-fontface": "*",
