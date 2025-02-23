@@ -7,6 +7,7 @@ use super::schema::mansionees;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use uuid::Uuid;
 #[derive(Serialize, Deserialize, Queryable, Selectable, Debug, Insertable, Clone, Type)]
 #[diesel(table_name = mansionees)]
 pub struct Mansionee {

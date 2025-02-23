@@ -152,6 +152,7 @@ dependencies = [
  "thirtyfour",
  "thiserror 2.0.11",
  "tokio",
+ "uuid",
  "webdriver-install",
 ]
 
@@ -948,6 +949,7 @@ dependencies = [
  "itoa 1.0.14",
  "pq-sys",
  "serde_json",
+ "uuid",
 ]
 
 [[package]]

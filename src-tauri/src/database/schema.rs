@@ -11,5 +11,6 @@ diesel::table! {
         receptions -> Nullable<Int4>,
         house_type -> Text,
         pictures -> Nullable<Jsonb>,
+        uuid -> Uuid,
     }
 }

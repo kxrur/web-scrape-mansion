@@ -17,8 +17,7 @@ use tauri::Manager;
 
 #[derive(Default)]
 struct AppState {
-    counter: u32,
-    Mansions: Vec<Mansionee>,
+    mansions: Vec<Mansionee>,
 }
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -38,24 +37,10 @@ struct Person {
     dream_floors: u32,
 }
 
-#[tauri::command]
-#[specta::specta] // < You must annotate your commands
-fn hello_world(person: Person) -> House {
-    House {
-        rooms: person.dream_rooms,
-        name: person.name,
-        floors: person.dream_floors,
-    }
-}
-
 fn main() {
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
-        .commands(collect_commands![
-            hello_world,
-            increment_counter,
-            load_mansions
-        ]);
+        .commands(collect_commands![load_mansions]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
     builder
@@ -102,14 +87,6 @@ async fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<M
     }
     .await;
     let mut state = state.lock().unwrap();
-    state.Mansions = mansions?;
-    Ok(state.Mansions.clone())
-}
-
-#[tauri::command]
-#[specta::specta] // < You must annotate your commands
-fn increment_counter(state: tauri::State<'_, Mutex<AppState>>) -> u32 {
-    let mut state = state.lock().unwrap();
-    state.counter += 1;
-    state.counter
+    state.mansions = mansions?;
+    Ok(state.mansions.clone())
 }

@@ -1,6 +1,6 @@
 use std::{env, panic};
 
-use diesel::{Connection, PgConnection, QueryResult};
+use diesel::{Connection, PgConnection};
 use dotenv::dotenv;
 
 use super::{models::Mansionee, schema::mansionees};
