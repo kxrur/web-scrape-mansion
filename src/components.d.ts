@@ -13,6 +13,7 @@ declare module 'vue' {
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     LoginFIXME: typeof import('./components/user/LoginFIXME.vue')['default']
     Mansion: typeof import('./components/mansion/Mansion.vue')['default']
+    MansionImages: typeof import('./components/mansion/MansionImages.vue')['default']
     MnasionDescription: typeof import('./components/mansion/MnasionDescription.vue')['default']
     NavBar: typeof import('./components/navigation/NavBar.vue')['default']
     RegisterFIXME: typeof import('./components/user/RegisterFIXME.vue')['default']

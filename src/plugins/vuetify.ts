@@ -15,7 +15,7 @@ import { customThemes } from './CustomThemes'
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
   theme: {
-    defaultTheme: 'myCustomLightTheme',
+    defaultTheme: 'dark',
     themes: customThemes,
   },
 })

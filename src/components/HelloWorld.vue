@@ -34,9 +34,12 @@
                 Replace this page by removing
                 <v-kbd>
                   {{ `
-                  <HelloWorld />` }}
+                  <HelloWorld />
+                  ` }}
                 </v-kbd>
-                in <v-kbd>pages/index.vue</v-kbd>.
+                in
+                <v-kbd>pages/index.vue</v-kbd>
+                .
               </div>
             </template>
 

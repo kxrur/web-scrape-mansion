@@ -2,7 +2,6 @@
   <v-col cols="4">
     <v-sheet class="pa-4 ma-2">
       <template v-if="!mansion">
-        <!-- Skeleton Loader -->
         <v-skeleton-loader
           type="list-item-avatar-two-line, list-item-two-line, list-item-two-line, list-item-two-line, list-item-two-line"
         ></v-skeleton-loader>
