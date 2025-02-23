@@ -9,7 +9,7 @@ mod links;
 mod scrape;
 mod scraper;
 
-use database::models::NewMansionee;
+use database::{models::NewMansionee, postgresql::get_mansionees};
 use scrape::errors::Error;
 use scraper::{test_massive_scrape, test_scrape_mansions};
 use std::sync::Mutex;
@@ -38,6 +38,7 @@ struct Person {
 }
 
 fn main() {
+    get_mansionees().unwrap().iter().for_each(|x| x.log());
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
         .commands(collect_commands![load_mansions]);

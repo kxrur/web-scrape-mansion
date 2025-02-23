@@ -4,7 +4,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
 
-use crate::database::models::NewMansionee;
+use crate::database::models::{NewMansionee, Picture};
 use crate::database::postgresql::save_mansionee;
 use crate::scrape::{
     action::close_cookie,
@@ -23,58 +23,6 @@ pub const ROOMS_CS: &str = "sv-property-intro-footer__group:nth-child(2)";
 pub const TYPE_CS: &str = "sv-property-intro-footer__group:nth-child(1) > div:nth-child(1)";
 pub const GALLERY_BLOCK: &str = "Gallerystyled__LeadGalleryContent-sc-h7kctk-1";
 pub const GALLERY_IMG: &str = "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0";
-
-#[derive(Serialize, Deserialize, Clone, Queryable)]
-pub struct Picture {
-    pub path: String,
-    pub name: String,
-}
-
-impl NewMansionee {
-    pub fn new(
-        address: String,
-        price: Option<i32>,
-        size: Option<f64>,
-        bedrooms: Option<i32>,
-        bathrooms: Option<i32>,
-        receptions: Option<i32>,
-        house_type: String,
-        pictures: Vec<Picture>,
-    ) -> Self {
-        let pictures_json = serde_json::to_value(pictures).ok();
-        NewMansionee {
-            address,
-            price,
-            size,
-            bedrooms,
-            bathrooms,
-            receptions,
-            house_type,
-            pictures: pictures_json,
-        }
-    }
-    pub fn log(&self) {
-        println!(
-            "Here is a mansion: 
-            Address: {}
-            Price: {} 
-            Size: {} sqm
-            Bedrooms: {} 
-            Bathrooms: {} 
-            Receptions: {} 
-            Type: {}
-            Pictures:{:?}",
-            self.address,
-            self.price.map_or("N/A".to_string(), |p| format!("${}", p)),
-            self.size.map_or("N/A".to_string(), |s| format!("{:.2}", s)),
-            self.bedrooms.map_or("N/A".to_string(), |b| b.to_string()),
-            self.bathrooms.map_or("N/A".to_string(), |b| b.to_string()),
-            self.receptions.map_or("N/A".to_string(), |r| r.to_string()),
-            self.house_type,
-            self.pictures
-        );
-    }
-}
 
 pub async fn setup_driver(server_url: String) -> WebDriver {
     //command: chromedriver --port=44444  (need the chromium package)

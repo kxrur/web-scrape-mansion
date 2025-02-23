@@ -3,7 +3,10 @@ use std::{env, panic};
 use diesel::{Connection, PgConnection};
 use dotenv::dotenv;
 
-use super::{models::NewMansionee, schema::mansionees};
+use super::{
+    models::{Mansionee, NewMansionee},
+    schema::mansionees,
+};
 use diesel::prelude::*;
 
 pub fn establish_connection() -> PgConnection {
@@ -21,4 +24,20 @@ pub fn save_mansionee(new_mansion: NewMansionee) -> NewMansionee {
         .returning(NewMansionee::as_returning())
         .get_result(conn)
         .expect("Error saving new mansion")
+}
+
+pub fn get_mansionees() -> Option<Vec<Mansionee>> {
+    use mansionees::dsl::mansionees;
+    let connection = &mut establish_connection();
+
+    match mansionees
+        .select(Mansionee::as_select())
+        .load::<Mansionee>(connection)
+    {
+        Ok(mansions) => Some(mansions),
+        Err(e) => {
+            println!("Error loading the mansions: {}", e);
+            None
+        }
+    }
 }
