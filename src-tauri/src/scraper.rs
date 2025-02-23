@@ -1,12 +1,12 @@
 use thirtyfour::prelude::*;
 
-use crate::database::models::Mansionee;
+use crate::database::models::NewMansionee;
 use crate::links::extract_savills_urls;
 
 use crate::scrape::errors::Error;
 use crate::scrape::scrape::{scrape_mansion, setup_driver};
 
-pub async fn test_scrape_mansions(links: Vec<String>) -> Result<Vec<Mansionee>, Error> {
+pub async fn test_scrape_mansions(links: Vec<String>) -> Result<Vec<NewMansionee>, Error> {
     delete_all_imgs("images");
     let driver = setup_driver("http://localhost:44444".to_string()).await;
     let mansions = scrape_mansions(&driver, links).await;
@@ -36,8 +36,8 @@ pub async fn test_massive_scrape() -> WebDriverResult<()> {
     Ok(()) // full run with current addresses took 5m47s
 }
 
-pub async fn scrape_mansions(driver: &WebDriver, urls: Vec<String>) -> Vec<Mansionee> {
-    let mut mansions: Vec<Mansionee> = Vec::new();
+pub async fn scrape_mansions(driver: &WebDriver, urls: Vec<String>) -> Vec<NewMansionee> {
+    let mut mansions: Vec<NewMansionee> = Vec::new();
     for url in urls.iter() {
         match scrape_mansion(driver, url.to_string()).await {
             Ok(mansion) => {

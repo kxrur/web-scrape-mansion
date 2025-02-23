@@ -9,7 +9,7 @@ mod links;
 mod scrape;
 mod scraper;
 
-use database::models::Mansionee;
+use database::models::NewMansionee;
 use scrape::errors::Error;
 use scraper::{test_massive_scrape, test_scrape_mansions};
 use std::sync::Mutex;
@@ -17,7 +17,7 @@ use tauri::Manager;
 
 #[derive(Default)]
 struct AppState {
-    mansions: Vec<Mansionee>,
+    mansions: Vec<NewMansionee>,
 }
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -67,7 +67,9 @@ fn _greet(name: &str) -> String {
 
 #[tauri::command]
 #[specta::specta] // < You must annotate your commands
-async fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<Mansionee>, Error> {
+async fn load_mansions(
+    state: tauri::State<'_, Mutex<AppState>>,
+) -> Result<Vec<NewMansionee>, Error> {
     let n = 1;
     let mansions = match n {
         1 => test_scrape_mansions(vec![

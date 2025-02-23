@@ -10,7 +10,23 @@ use specta::Type;
 use uuid::Uuid;
 #[derive(Serialize, Deserialize, Queryable, Selectable, Debug, Insertable, Clone, Type)]
 #[diesel(table_name = mansionees)]
+pub struct NewMansionee {
+    pub address: String,
+    pub price: Option<i32>,
+    pub size: Option<f64>,
+    pub bedrooms: Option<i32>,
+    pub bathrooms: Option<i32>,
+    pub receptions: Option<i32>,
+    pub house_type: String,
+    #[specta(skip)] // Skip the field if it can't be easily converted. FIXME: could cause issues
+    pub pictures: Option<serde_json::Value>,
+}
+#[derive(Serialize, Deserialize, Queryable, Selectable, Debug, Clone, Type)]
+#[diesel(table_name = mansionees)]
 pub struct Mansionee {
+    pub id: i32,
+    #[specta(skip)] // Skip the field if it can't be easily converted. FIXME: could cause issues
+    pub uuid: Uuid,
     pub address: String,
     pub price: Option<i32>,
     pub size: Option<f64>,

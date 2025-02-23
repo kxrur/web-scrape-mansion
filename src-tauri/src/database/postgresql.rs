@@ -3,7 +3,7 @@ use std::{env, panic};
 use diesel::{Connection, PgConnection};
 use dotenv::dotenv;
 
-use super::{models::Mansionee, schema::mansionees};
+use super::{models::NewMansionee, schema::mansionees};
 use diesel::prelude::*;
 
 pub fn establish_connection() -> PgConnection {
@@ -13,12 +13,12 @@ pub fn establish_connection() -> PgConnection {
     PgConnection::establish(&database_url)
         .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
-pub fn save_mansionee(new_mansion: Mansionee) -> Mansionee {
+pub fn save_mansionee(new_mansion: NewMansionee) -> NewMansionee {
     let conn = &mut establish_connection();
 
     diesel::insert_into(mansionees::table)
         .values(&new_mansion)
-        .returning(Mansionee::as_returning())
+        .returning(NewMansionee::as_returning())
         .get_result(conn)
         .expect("Error saving new mansion")
 }

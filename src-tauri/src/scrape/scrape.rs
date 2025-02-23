@@ -4,7 +4,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
 
-use crate::database::models::Mansionee;
+use crate::database::models::NewMansionee;
 use crate::database::postgresql::save_mansionee;
 use crate::scrape::{
     action::close_cookie,
@@ -30,7 +30,7 @@ pub struct Picture {
     pub name: String,
 }
 
-impl Mansionee {
+impl NewMansionee {
     pub fn new(
         address: String,
         price: Option<i32>,
@@ -42,7 +42,7 @@ impl Mansionee {
         pictures: Vec<Picture>,
     ) -> Self {
         let pictures_json = serde_json::to_value(pictures).ok();
-        Mansionee {
+        NewMansionee {
             address,
             price,
             size,
@@ -85,7 +85,7 @@ pub async fn setup_driver(server_url: String) -> WebDriver {
         .expect("Failed to load driver")
 }
 
-pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<(Mansionee)> {
+pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<(NewMansionee)> {
     println!("{}", url);
     driver.goto(&url).await?;
     close_cookie(driver, &url).await;
@@ -114,7 +114,7 @@ pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<
         let house_type = eval_type(driver).await?;
 
         let pictures = eval_imgs(driver, &address1).await;
-        let mansion = Mansionee::new(
+        let mansion = NewMansionee::new(
             full_address,
             price,
             size,
