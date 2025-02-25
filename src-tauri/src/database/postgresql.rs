@@ -1,7 +1,6 @@
-use std::{env, panic};
-
 use diesel::{Connection, PgConnection};
 use dotenv::dotenv;
+use std::{env, panic};
 
 use super::{
     models::{Mansionee, NewMansionee},

@@ -45,21 +45,29 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { commands } from '@/bindings'
+import { commands, type Mansionee } from '@/bindings'
 
-const mansion = ref()
+const props = defineProps<{
+  id: String
+}>()
+
+const mansion = ref<Mansionee>()
 
 onMounted(async () => {
+  //await new Promise((resolve) => setTimeout(resolve, 2000)) // Simulate loading delay
+
   try {
-    console.log('start loading mansions')
-    const result = await commands.loadMansions()
-    console.log('finish loading mansions')
+    const result = await commands.getMansionById(Number(props.id))
 
     if (result.status === 'ok') {
-      const mansions = result.data
-      mansion.value = mansions.length > 0 ? mansions[0] : null
+      mansion.value = result.data
     } else {
-      console.error('Error loading mansions:', result.error)
+      console.error(
+        'Error loading mansion:',
+        props.id,
+        'with error: ',
+        result.error
+      )
     }
   } catch (error) {
     console.error('Unexpected error:', error)

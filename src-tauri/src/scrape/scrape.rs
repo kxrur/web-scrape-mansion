@@ -209,6 +209,7 @@ async fn eval_imgs(driver: &WebDriver, address1: &String) -> Vec<Picture> {
             .expect("no src attr found")
             .expect("src attr is wrong");
 
+        //FIXME:DO NOT SAVE THE DATABASE_PATH TO THE PSQL DATABASE !!!
         let database_path = format!("{}/Desktop/images", home_dir().unwrap().to_string_lossy());
         let foldername = remove_spaces(address1.clone());
         let file_path =

@@ -19,29 +19,38 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { homeDir, join } from '@tauri-apps/api/path'
 import { convertFileSrc } from '@tauri-apps/api/core'
+import { commands } from '@/bindings'
+
+const props = defineProps<{
+  id: string
+}>()
+
+interface Picture {
+  name: string
+  path: string
+}
 
 const images = ref<string[]>([])
 
 onMounted(async () => {
-  // Simulate a delay for demonstration purposes
-  await new Promise((resolve) => setTimeout(resolve, 2000))
+  //await new Promise((resolve) => setTimeout(resolve, 2000)) // Simulate loading delay
 
-  const homeDirPath = await homeDir()
-  const filePath = await join(
-    homeDirPath,
-    'Desktop/images/Blairlogie_Castle/Aerial(10).jpg'
-  )
-  const assetUrl = convertFileSrc(filePath)
-  console.log(assetUrl)
-
-  images.value = [
-    'https://cdn.vuetifyjs.com/images/cards/docks.jpg',
-    assetUrl,
-    'https://cdn.vuetifyjs.com/images/cards/hotel.jpg',
-    'https://cdn.vuetifyjs.com/images/cards/sunshine.jpg',
-  ]
+  const result = await commands.getMansionById(Number(props.id))
+  if (result.status === 'ok') {
+    const mansion = result.data
+    if (mansion.pictures) {
+      const pictures = mansion.pictures as unknown as Picture[]
+      if (pictures.length > 0) {
+        const imageUrls = pictures.map((picture) => {
+          const filepath = picture.path
+          console.log(filepath)
+          return convertFileSrc(filepath)
+        })
+        images.value = imageUrls.filter((url) => url !== '')
+      }
+    }
+  }
 })
 </script>
 

@@ -18,7 +18,6 @@ pub struct NewMansionee {
     pub bathrooms: Option<i32>,
     pub receptions: Option<i32>,
     pub house_type: String,
-    #[specta(skip)] // Skip the field if it can't be easily converted. FIXME: could cause issues
     pub pictures: Option<serde_json::Value>,
 }
 
@@ -78,7 +77,6 @@ impl NewMansionee {
 #[diesel(table_name = mansionees)]
 pub struct Mansionee {
     pub id: i32,
-    #[specta(skip)] // Skip the field if it can't be easily converted. FIXME: could cause issues
     pub uuid: Uuid,
     pub address: String,
     pub price: Option<i32>,
@@ -87,7 +85,6 @@ pub struct Mansionee {
     pub bathrooms: Option<i32>,
     pub receptions: Option<i32>,
     pub house_type: String,
-    #[specta(skip)] // Skip the field if it can't be easily converted. FIXME: could cause issues
     pub pictures: Option<serde_json::Value>,
 }
 

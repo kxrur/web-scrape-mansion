@@ -5,9 +5,33 @@
 
 
 export const commands = {
-async loadMansions() : Promise<Result<Mansionee[], Error>> {
+async loadMansions() : Promise<Result<NewMansionee[], Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("load_mansions") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async loadDatabaseMansions() : Promise<Result<Mansionee[], Error>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("load_database_mansions") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async loadAllUrlMansions() : Promise<Result<NewMansionee[], Error>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("load_all_url_mansions") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getMansionById(id: number) : Promise<Result<Mansionee, Error>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_mansion_by_id", { id }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -26,7 +50,9 @@ async loadMansions() : Promise<Result<Mansionee[], Error>> {
 /** user-defined types **/
 
 export type Error = { Network: string } | { Parsing: string }
-export type Mansionee = { address: string; price: number | null; size: number | null; bedrooms: number | null; bathrooms: number | null; receptions: number | null; house_type: string }
+export type JsonValue = null | boolean | number | string | JsonValue[] | { [key in string]: JsonValue }
+export type Mansionee = { id: number; uuid: string; address: string; price: number | null; size: number | null; bedrooms: number | null; bathrooms: number | null; receptions: number | null; house_type: string; pictures: JsonValue | null }
+export type NewMansionee = { address: string; price: number | null; size: number | null; bedrooms: number | null; bathrooms: number | null; receptions: number | null; house_type: string; pictures: JsonValue | null }
 
 /** tauri-specta globals **/
 

@@ -17,23 +17,20 @@ pub async fn test_scrape_mansions(links: Vec<String>) -> Result<Vec<NewMansionee
     Ok(mansions)
 }
 
-pub async fn test_massive_scrape() -> WebDriverResult<()> {
+pub async fn test_massive_scrape() -> Result<Vec<NewMansionee>, Error> {
     delete_all_imgs("images");
     let driver = setup_driver("http://localhost:44444".to_string()).await;
+    let mut mansions: Vec<NewMansionee> = Vec::new();
 
     let file_path = "src/bookmarks.html";
     let links = extract_savills_urls(file_path);
 
-    match links {
-        Ok(urls) => {
-            let _ = scrape_mansions(&driver, urls).await;
-        }
-        Err(e) => {
-            eprintln!("Invalid URLs: {}", e);
-        }
-    }
-    driver.quit().await?;
-    Ok(()) // full run with current addresses took 5m47s
+    mansions = scrape_mansions(&driver, links).await;
+    match driver.quit().await {
+        Ok(_) => println!("Quit driver successfully"),
+        Err(e) => println!("{}", e),
+    };
+    Ok(mansions)
 }
 
 pub async fn scrape_mansions(driver: &WebDriver, urls: Vec<String>) -> Vec<NewMansionee> {

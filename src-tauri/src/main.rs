@@ -9,7 +9,11 @@ mod links;
 mod scrape;
 mod scraper;
 
-use database::{models::NewMansionee, postgresql::get_mansionees};
+use database::{
+    models::{Mansionee, NewMansionee},
+    postgresql::get_mansionees,
+};
+use links::extract_savills_urls;
 use scrape::errors::Error;
 use scraper::{test_massive_scrape, test_scrape_mansions};
 use std::sync::Mutex;
@@ -17,7 +21,7 @@ use tauri::Manager;
 
 #[derive(Default)]
 struct AppState {
-    mansions: Vec<NewMansionee>,
+    mansions: Vec<Mansionee>, //FIXME: use a HashMap instead of a Vec
 }
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -38,10 +42,14 @@ struct Person {
 }
 
 fn main() {
-    get_mansionees().unwrap().iter().for_each(|x| x.log());
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
-        .commands(collect_commands![load_mansions]);
+        .commands(collect_commands![
+            load_mansions,
+            load_database_mansions,
+            load_all_url_mansions,
+            get_mansion_by_id
+        ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
     builder
@@ -71,8 +79,9 @@ fn _greet(name: &str) -> String {
 async fn load_mansions(
     state: tauri::State<'_, Mutex<AppState>>,
 ) -> Result<Vec<NewMansionee>, Error> {
-    let n = 1;
-    let mansions = match n {
+    let n = 3;
+
+    match n {
         1 => test_scrape_mansions(vec![
             "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
         ]),
@@ -82,14 +91,49 @@ async fn load_mansions(
             "https://search.savills.com/property-detail/gbslaklai220042".to_string(),
             "https://search.savills.com/property-detail/gbslaklak200005".to_string(),
         ]),
-        // 3 => Some(test_massive_scrape()),
+
         _ => {
             println!("No data is scraped");
             test_scrape_mansions(vec!["".to_string()])
         }
     }
-    .await;
+    .await // Return the result directly
+
+    // If you need to update the state with the scraped mansions:
+    // let mut state = state.lock().unwrap();
+    // state.mansions = result?;
+    // Ok(state.mansions.clone())
+}
+
+#[tauri::command]
+#[specta::specta] // < You must annotate your commands
+async fn load_all_url_mansions() -> Result<Vec<NewMansionee>, Error> {
+    test_massive_scrape().await
+}
+
+#[tauri::command]
+#[specta::specta] // < You must annotate your commands
+fn load_database_mansions(
+    state: tauri::State<'_, Mutex<AppState>>,
+) -> Result<Vec<Mansionee>, Error> {
+    let mansions = get_mansionees().unwrap();
     let mut state = state.lock().unwrap();
-    state.mansions = mansions?;
+    state.mansions = mansions;
     Ok(state.mansions.clone())
+}
+
+#[tauri::command]
+#[specta::specta]
+fn get_mansion_by_id(
+    id: u32,
+    state: tauri::State<'_, Mutex<AppState>>,
+) -> Result<Mansionee, Error> {
+    let state = state.lock().unwrap();
+    match state.mansions.get(id as usize) {
+        Some(mansion) => Ok(mansion.clone()),
+        None => Err(Error::Parsing(format!(
+            "did not found mansion with id: {}",
+            id
+        ))),
+    }
 }

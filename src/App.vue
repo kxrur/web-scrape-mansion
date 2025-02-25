@@ -7,5 +7,6 @@
 </template>
 
 <script lang="ts" setup>
-//
+import { commands } from './bindings'
+commands.loadAllUrlMansions()
 </script>

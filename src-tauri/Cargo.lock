@@ -120,14 +120,15 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.95"
+version = "1.0.96"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34ac096ce696dc2fcabef30516bb13c0a68a11d30131d3df6f04711467681b04"
+checksum = "6b964d184e89d9b6b67dd2715bc8e74cf3107fb2b529990c90cf517326150bf4"
 
 [[package]]
 name = "app"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "async-recursion",
  "base64 0.22.1",
  "diesel",
@@ -4640,8 +4641,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ccbb212565d2dc177bc15ecb7b039d66c4490da892436a4eee5b394d620c9bc"
 dependencies = [
  "paste",
+ "serde",
+ "serde_json",
  "specta-macros",
  "thiserror 1.0.69",
+ "uuid",
 ]
 
 [[package]]
