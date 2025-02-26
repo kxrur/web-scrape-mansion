@@ -26,4 +26,4 @@ function increment() {
     })
     .catch((e) => console.error(e))
 }
-
+</script>
