@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "mansions",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "web.scrape.mansion",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
