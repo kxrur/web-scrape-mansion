@@ -6,7 +6,4 @@
   </v-app>
 </template>
 
-<script lang="ts" setup>
-import { commands } from './bindings'
-commands.loadAllUrlMansions()
-</script>
+<script lang="ts" setup></script>
