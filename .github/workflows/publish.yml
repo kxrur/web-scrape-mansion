@@ -43,6 +43,19 @@ jobs:
 
       - name: install frontend dependencies
         run: npm install # change this to npm, pnpm or bun depending on which one you use.
+    steps:
+      - uses: ikalnytskyi/action-setup-postgres@v7
+        with:
+          username: kxr
+          password: 
+          database: mansions
+        id: postgres
+    
+      - run: psql ${{ steps.postgres.outputs.connection-uri }} -c "SELECT 1"
+      - run: psql service=${{ steps.postgres.outputs.service-name }} -c "SELECT 1"
+      - run: psql -c "SELECT 1"
+        env:
+          PGSERVICE: ${{ steps.postgres.outputs.service-name }}
 
       - uses: tauri-apps/tauri-action@v0
         env:
