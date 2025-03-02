@@ -10,7 +10,7 @@ mod scrape;
 mod scraper;
 
 use database::{
-    models::{Mansionee, NewMansionee},
+    models::{Mansionee, NewMansionee, Setting},
     postgresql::get_mansionees,
 };
 use links::extract_savills_urls;
@@ -22,6 +22,7 @@ use tauri::Manager;
 #[derive(Default)]
 struct AppState {
     mansions: Vec<Mansionee>, //FIXME: use a HashMap instead of a Vec
+    settings: Setting,
 }
 use serde::{Deserialize, Serialize};
 use specta::Type;

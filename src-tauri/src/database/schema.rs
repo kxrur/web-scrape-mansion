@@ -18,9 +18,9 @@ diesel::table! {
 diesel::table! {
     settings (id) {
         id -> Int4,
-        profile -> Varchar,
-        theme -> Varchar,
-        db_path -> Varchar,
+        profile -> Nullable<Varchar>,
+        theme -> Nullable<Varchar>,
+        db_path -> Nullable<Varchar>,
     }
 }
 

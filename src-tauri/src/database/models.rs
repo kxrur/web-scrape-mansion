@@ -119,16 +119,18 @@ impl Mansionee {
 #[derive(Serialize, Deserialize, Queryable, Selectable, Debug, Insertable, Clone, Type)]
 #[diesel(table_name = settings)]
 pub struct NewSetting {
-    pub profile: String,
-    pub theme: String,
-    pub db_path: String,
+    pub profile: Option<String>,
+    pub theme: Option<String>,
+    pub db_path: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Queryable, Selectable, Debug, Insertable, Clone, Type)]
+#[derive(
+    Serialize, Deserialize, Queryable, Selectable, Debug, Insertable, Clone, Type, Default,
+)]
 #[diesel(table_name = settings)]
 pub struct Setting {
     pub id: i32,
-    pub profile: String,
-    pub theme: String,
-    pub db_path: String,
+    pub profile: Option<String>,
+    pub theme: Option<String>,
+    pub db_path: Option<String>,
 }
