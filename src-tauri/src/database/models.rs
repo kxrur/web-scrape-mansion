@@ -3,7 +3,7 @@
 #![allow(unused)]
 #![allow(clippy::all)]
 
-use super::schema::mansionees;
+use super::schema::{mansionees, settings};
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -114,4 +114,21 @@ impl Mansionee {
             self.pictures
         );
     }
+}
+
+#[derive(Serialize, Deserialize, Queryable, Selectable, Debug, Insertable, Clone, Type)]
+#[diesel(table_name = settings)]
+pub struct NewSetting {
+    pub profile: String,
+    pub theme: String,
+    pub db_path: String,
+}
+
+#[derive(Serialize, Deserialize, Queryable, Selectable, Debug, Insertable, Clone, Type)]
+#[diesel(table_name = settings)]
+pub struct Setting {
+    pub id: i32,
+    pub profile: String,
+    pub theme: String,
+    pub db_path: String,
 }

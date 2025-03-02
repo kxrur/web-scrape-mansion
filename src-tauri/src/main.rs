@@ -15,7 +15,7 @@ use database::{
 };
 use links::extract_savills_urls;
 use scrape::errors::Error;
-use scraper::{test_massive_scrape, test_scrape_mansions};
+use scraper::{scrape_one_mansion, test_massive_scrape, test_scrape_mansions};
 use std::sync::Mutex;
 use tauri::Manager;
 
@@ -48,7 +48,8 @@ fn main() {
             load_mansions,
             load_database_mansions,
             load_all_url_mansions,
-            get_mansion_by_id
+            get_mansion_by_id,
+            scrape_one_mansion
         ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
