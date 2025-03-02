@@ -11,7 +11,7 @@ mod scraper;
 
 use database::{
     models::{Mansionee, NewMansionee, Setting},
-    postgresql::{get_mansionees, get_setting, save_setting},
+    postgresql::{get_mansionees, get_settings, save_setting},
 };
 use scrape::errors::Error;
 use scraper::{scrape_one_mansion, test_massive_scrape, test_scrape_mansions};
@@ -50,7 +50,7 @@ fn main() {
             load_all_url_mansions,
             get_mansion_by_id,
             scrape_one_mansion,
-            get_setting,
+            get_settings,
             save_setting,
             get_setting_by_id
         ]);

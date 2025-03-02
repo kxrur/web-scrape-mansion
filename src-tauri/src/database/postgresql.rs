@@ -55,12 +55,12 @@ pub fn save_setting(
         .returning(NewSetting::as_returning())
         .get_result(connection)
         .expect("Error saving new mansion");
-    get_setting(state)
+    get_settings(state)
 }
 
 #[tauri::command]
 #[specta::specta]
-pub fn get_setting(state: tauri::State<'_, Mutex<AppState>>) -> Option<Vec<Setting>> {
+pub fn get_settings(state: tauri::State<'_, Mutex<AppState>>) -> Option<Vec<Setting>> {
     let connection = &mut establish_connection();
 
     match settings::dsl::settings
