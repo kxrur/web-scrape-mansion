@@ -31,6 +31,7 @@
       <!--TODO: Make page title reflect the page's contents -->
       <v-app-bar-title>Web Scrape Mansions</v-app-bar-title>
 
+      <Settings></Settings>
       <v-btn icon="mdi-login" color="primary" to="/user/login" />
     </v-app-bar>
 
