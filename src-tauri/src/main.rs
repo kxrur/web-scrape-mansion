@@ -11,9 +11,8 @@ mod scraper;
 
 use database::{
     models::{Mansionee, NewMansionee, Setting},
-    postgresql::get_mansionees,
+    postgresql::{get_mansionees, get_setting, save_setting},
 };
-use links::extract_savills_urls;
 use scrape::errors::Error;
 use scraper::{scrape_one_mansion, test_massive_scrape, test_scrape_mansions};
 use std::sync::Mutex;
@@ -22,7 +21,7 @@ use tauri::Manager;
 #[derive(Default)]
 struct AppState {
     mansions: Vec<Mansionee>, //FIXME: use a HashMap instead of a Vec
-    settings: Setting,
+    settings: Vec<Setting>,
 }
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -50,7 +49,10 @@ fn main() {
             load_database_mansions,
             load_all_url_mansions,
             get_mansion_by_id,
-            scrape_one_mansion
+            scrape_one_mansion,
+            get_setting,
+            save_setting,
+            get_setting_by_id
         ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
@@ -135,6 +137,19 @@ fn get_mansion_by_id(
         Some(mansion) => Ok(mansion.clone()),
         None => Err(Error::Parsing(format!(
             "did not found mansion with id: {}",
+            id
+        ))),
+    }
+}
+
+#[tauri::command]
+#[specta::specta]
+fn get_setting_by_id(id: u32, state: tauri::State<'_, Mutex<AppState>>) -> Result<Setting, Error> {
+    let state = state.lock().unwrap();
+    match state.settings.get(id as usize) {
+        Some(setting) => Ok(setting.clone()),
+        None => Err(Error::Parsing(format!(
+            "did not find setting with id: {}",
             id
         ))),
     }
