@@ -1,6 +1,10 @@
 <template>
   <div>
-    <v-dialog activator="parent" max-width="800">
+    <v-dialog
+      activator="parent"
+      max-width="800"
+      @update:model-value="selectedSection = 'Data'"
+    >
       <template v-slot:activator="{ props: activatorProps }">
         <v-btn v-bind="activatorProps" icon="mdi-cog" color="primary"></v-btn>
       </template>
