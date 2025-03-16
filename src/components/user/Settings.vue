@@ -51,9 +51,11 @@
                 </v-list>
               </v-col>
 
-              <!-- Content Area -->
               <v-col cols="9">
-                <DataSettings v-if="selectedSection === 'Data'" />
+                <DataSettings
+                  v-if="selectedSection === 'Data'"
+                  ref="dataSettings"
+                />
                 <AppearanceSettings
                   v-else-if="selectedSection === 'Appearance'"
                 />
@@ -75,7 +77,12 @@
                 rounded="xl"
                 text="Apply"
                 variant="flat"
-                @click="isActive.value = false"
+                @click="
+                  () => {
+                    isActive.value = false
+                    saveSettings()
+                  }
+                "
               ></v-btn>
             </v-card-actions>
           </v-card-text>
@@ -86,7 +93,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-
 const selectedSection = ref('Data')
+const dataSettings = useTemplateRef('dataSettings')
+
+function saveSettings() {
+  if (dataSettings.value) {
+    console.log('meh', dataSettings.value.dataFolder)
+  }
+}
 </script>
