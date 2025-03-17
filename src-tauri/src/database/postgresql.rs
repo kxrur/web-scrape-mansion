@@ -49,6 +49,7 @@ pub fn save_setting(
     state: tauri::State<'_, Mutex<AppState>>,
     new_setting: NewSetting,
 ) -> Option<Vec<Setting>> {
+    //FIXME: return None if the operation failed
     let connection = &mut establish_connection();
     diesel::insert_into(settings::table)
         .values(&new_setting)

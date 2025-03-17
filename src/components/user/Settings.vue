@@ -1,5 +1,23 @@
 <template>
   <div>
+    <v-snackbar
+      v-model="alert.show"
+      :color="alert.type"
+      :timeout="3000"
+      location="top right"
+    >
+      {{ alert.message }}
+
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="alert.show = false"
+          icon="mdi-close"
+        ></v-btn>
+      </template>
+    </v-snackbar>
+
     <v-dialog
       activator="parent"
       max-width="800"
@@ -80,7 +98,7 @@
                 @click="
                   () => {
                     isActive.value = false
-                    saveSettings()
+                    applySettings()
                   }
                 "
               ></v-btn>
@@ -93,12 +111,49 @@
 </template>
 
 <script setup lang="ts">
+import { commands, type Setting } from '@/bindings'
+
 const selectedSection = ref('Data')
 const dataSettings = useTemplateRef('dataSettings')
 
-function saveSettings() {
+const alert = ref<{
+  show: boolean
+  type: 'success' | 'error' | 'info' | 'warning' | undefined
+  message: string
+}>({
+  show: false,
+  type: undefined,
+  message: '',
+})
+
+function applySettings() {
   if (dataSettings.value) {
-    console.log('meh', dataSettings.value.dataFolder)
+    let setting: Setting = {
+      id: 0,
+      db_path: dataSettings.value.dataFolder,
+      profile: 'meh',
+      theme: 'light',
+    }
+    commands
+      .saveSetting(setting)
+      .then((setting) => {
+        if (setting) {
+          alert.value = {
+            show: true,
+            type: 'success',
+            message: 'Settings applied successfully!',
+          }
+        } else {
+          alert.value = {
+            show: true,
+            type: 'error',
+            message: 'Failed to apply settings.',
+          }
+        }
+      })
+      .catch((error) => {
+        console.error('Promise rejected with error: ' + error)
+      })
   }
 }
 </script>
