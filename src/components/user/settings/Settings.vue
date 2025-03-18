@@ -38,47 +38,18 @@
               variant="text"
               color="primary"
               @click="isActive.value = false"
+              :disabled="isDialogOpen"
             ></v-btn>
           </v-card-title>
 
           <v-divider class="mb-4"></v-divider>
 
           <v-card-text>
-            <v-row>
-              <v-col cols="3">
-                <v-list color="surface">
-                  <v-list-item
-                    value="Data"
-                    :active="selectedSection === 'Data'"
-                    color="primary"
-                    base-color=""
-                    @click="selectedSection = 'Data'"
-                  >
-                    <v-list-item-title>Data</v-list-item-title>
-                  </v-list-item>
-
-                  <v-list-item
-                    value="Appearance"
-                    :active="selectedSection === 'Appearance'"
-                    color="primary"
-                    base-color=""
-                    @click="selectedSection = 'Appearance'"
-                  >
-                    <v-list-item-title>Appearance</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-col>
-
-              <v-col cols="9">
-                <DataSettings
-                  v-if="selectedSection === 'Data'"
-                  ref="dataSettings"
-                />
-                <AppearanceSettings
-                  v-else-if="selectedSection === 'Appearance'"
-                />
-              </v-col>
-            </v-row>
+            <SettingsBar
+              :selected-section="selectedSection"
+              v-model="isDialogOpen"
+              @update:selectedSection="(value) => (selectedSection = value)"
+            ></SettingsBar>
             <v-divider class="mt-2"></v-divider>
 
             <v-card-actions class="my-2 d-flex justify-end">
@@ -87,6 +58,7 @@
                 rounded="xl"
                 text="Cancel"
                 @click="isActive.value = false"
+                :disabled="isDialogOpen"
               ></v-btn>
 
               <v-btn
@@ -101,6 +73,7 @@
                     applySettings()
                   }
                 "
+                :disabled="isDialogOpen"
               ></v-btn>
             </v-card-actions>
           </v-card-text>
@@ -111,10 +84,12 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { commands, type Setting } from '@/bindings'
 
 const selectedSection = ref('Data')
-const dataSettings = useTemplateRef('dataSettings')
+const dataSettings = ref()
+const isDialogOpen = ref(false) // Track dialog state
 
 const alert = ref<{
   show: boolean
@@ -154,6 +129,12 @@ function applySettings() {
       .catch((error) => {
         console.error('Promise rejected with error: ' + error)
       })
+  } else {
+    alert.value = {
+      show: true,
+      type: 'error',
+      message: 'Failed to apply settings.',
+    }
   }
 }
 </script>

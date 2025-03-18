@@ -8,11 +8,17 @@
       label="Data Folder"
       variant="solo-inverted"
       readonly
+      :disabled="isDialogOpen"
       @click="openDirectoryPicker"
     ></v-text-field>
 
     <div class="text-h7 mb-2">Sync</div>
-    <v-switch label="Enable Data Sync" color="primary" hide-details></v-switch>
+    <v-switch
+      label="Enable Data Sync"
+      color="primary"
+      hide-details
+      :disabled="isDialogOpen"
+    ></v-switch>
   </div>
 </template>
 
@@ -20,10 +26,20 @@
 import { ref } from 'vue'
 import { open } from '@tauri-apps/plugin-dialog'
 
+defineProps<{
+  isDialogOpen: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:isDialogOpen', value: boolean): void
+}>()
+
 const dataFolder = ref<string | null>(null)
 
 const openDirectoryPicker = async () => {
   try {
+    emit('update:isDialogOpen', true) // Notify parent that dialog is open
+
     // Open a directory picker
     const selected = await open({
       directory: true,
@@ -38,6 +54,8 @@ const openDirectoryPicker = async () => {
     }
   } catch (error) {
     console.error('Error selecting directory:', error)
+  } finally {
+    emit('update:isDialogOpen', false) // Notify parent that dialog is closed
   }
 }
 

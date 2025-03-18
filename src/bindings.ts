@@ -48,7 +48,7 @@ async scrapeOneMansion(url: string) : Promise<Result<NewMansionee, Error>> {
 async getSettings() : Promise<Setting[] | null> {
     return await TAURI_INVOKE("get_settings");
 },
-async saveSetting(newSetting: NewSetting) : Promise<Setting[] | null> {
+async saveSetting(newSetting: NewSetting) : Promise<Setting | null> {
     return await TAURI_INVOKE("save_setting", { newSetting });
 },
 async getSettingById(id: number) : Promise<Result<Setting, Error>> {

@@ -45,18 +45,19 @@ pub fn get_mansionees() -> Option<Vec<Mansionee>> {
 
 #[tauri::command]
 #[specta::specta]
-pub fn save_setting(
-    state: tauri::State<'_, Mutex<AppState>>,
-    new_setting: NewSetting,
-) -> Option<Vec<Setting>> {
-    //FIXME: return None if the operation failed
+pub fn save_setting(new_setting: NewSetting) -> Option<Setting> {
     let connection = &mut establish_connection();
-    diesel::insert_into(settings::table)
+    match diesel::insert_into(settings::table)
         .values(&new_setting)
-        .returning(NewSetting::as_returning())
+        .returning(Setting::as_returning())
         .get_result(connection)
-        .expect("Error saving new mansion");
-    get_settings(state)
+    {
+        Ok(setting) => Some(setting),
+        Err(e) => {
+            println!("Error saving the setting: {}", e);
+            None
+        }
+    }
 }
 
 #[tauri::command]
