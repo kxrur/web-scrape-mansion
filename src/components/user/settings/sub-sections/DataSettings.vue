@@ -3,6 +3,7 @@
     <div class="text-h6 mb-4">Data Settings</div>
 
     <div class="text-h7 mb-2">Storage Folder</div>
+    <!-- FIXME: display the Data Folder path for the current user -->
     <v-text-field
       :model-value="dataFolder"
       label="Data Folder"
