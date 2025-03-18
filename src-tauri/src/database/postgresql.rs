@@ -1,10 +1,12 @@
 use diesel::{Connection, PgConnection};
 use dotenv::dotenv;
-use std::{env, panic};
+use std::{env, panic, sync::Mutex};
+
+use crate::AppState;
 
 use super::{
-    models::{Mansionee, NewMansionee},
-    schema::mansionees,
+    models::{Mansionee, NewMansionee, NewSetting, Setting},
+    schema::{mansionees, settings},
 };
 use diesel::prelude::*;
 
@@ -34,6 +36,46 @@ pub fn get_mansionees() -> Option<Vec<Mansionee>> {
         .load::<Mansionee>(connection)
     {
         Ok(mansions) => Some(mansions),
+        Err(e) => {
+            println!("Error loading the mansions: {}", e);
+            None
+        }
+    }
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn save_setting(new_setting: NewSetting) -> Option<Setting> {
+    let connection = &mut establish_connection();
+    match diesel::insert_into(settings::table)
+        .values(&new_setting)
+        .returning(Setting::as_returning())
+        .get_result(connection)
+    {
+        Ok(setting) => Some(setting),
+        Err(e) => {
+            println!("Error saving the setting: {}", e);
+            None
+        }
+    }
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn get_settings(state: tauri::State<'_, Mutex<AppState>>) -> Option<Vec<Setting>> {
+    let connection = &mut establish_connection();
+
+    match settings::dsl::settings
+        .select(Setting::as_select())
+        .load::<Setting>(connection)
+    {
+        Ok(all_settings) => {
+            if all_settings.len() > 1 {
+                let mut state = state.lock().unwrap();
+                state.settings = all_settings.clone();
+            }
+            Some(all_settings)
+        }
         Err(e) => {
             println!("Error loading the mansions: {}", e);
             None

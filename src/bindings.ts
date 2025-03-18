@@ -36,6 +36,28 @@ async getMansionById(id: number) : Promise<Result<Mansionee, Error>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async scrapeOneMansion(url: string) : Promise<Result<NewMansionee, Error>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("scrape_one_mansion", { url }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getSettings() : Promise<Setting[] | null> {
+    return await TAURI_INVOKE("get_settings");
+},
+async saveSetting(newSetting: NewSetting) : Promise<Setting | null> {
+    return await TAURI_INVOKE("save_setting", { newSetting });
+},
+async getSettingById(id: number) : Promise<Result<Setting, Error>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_setting_by_id", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -53,6 +75,8 @@ export type Error = { Network: string } | { Parsing: string }
 export type JsonValue = null | boolean | number | string | JsonValue[] | { [key in string]: JsonValue }
 export type Mansionee = { id: number; uuid: string; address: string; price: number | null; size: number | null; bedrooms: number | null; bathrooms: number | null; receptions: number | null; house_type: string; pictures: JsonValue | null }
 export type NewMansionee = { address: string; price: number | null; size: number | null; bedrooms: number | null; bathrooms: number | null; receptions: number | null; house_type: string; pictures: JsonValue | null }
+export type NewSetting = { profile: string | null; theme: string | null; db_path: string | null }
+export type Setting = { id: number; profile: string | null; theme: string | null; db_path: string | null }
 
 /** tauri-specta globals **/
 

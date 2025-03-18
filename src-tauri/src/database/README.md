@@ -14,7 +14,7 @@ This isn't perfect and will likely require a review
 
 - `diesel migration run` to edit postgresql database
 - `diesel print-schema > src/database/schema.rs` to generate **schema.rs**
-- run `diesel_ext --model -t > src/database/models.rs` to generate the
+- run `~/.cargo/bin/diesel_ext --model -t > src/database/models.rs` to generate the
   `models.rs` file
 
 ## postgresql CLI

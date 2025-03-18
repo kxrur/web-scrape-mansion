@@ -14,3 +14,17 @@ diesel::table! {
         uuid -> Uuid,
     }
 }
+
+diesel::table! {
+    settings (id) {
+        id -> Int4,
+        profile -> Nullable<Varchar>,
+        theme -> Nullable<Varchar>,
+        db_path -> Nullable<Varchar>,
+    }
+}
+
+diesel::allow_tables_to_appear_in_same_query!(
+    mansionees,
+    settings,
+);

@@ -8,10 +8,10 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AllMansions: typeof import('./components/mansion/AllMansions.vue')['default']
-    AppearanceSettings: typeof import('./components/user/AppearanceSettings.vue')['default']
+    AppearanceSettings: typeof import('./components/user/settings/sub-sections/AppearanceSettings.vue')['default']
     AppFooter: typeof import('./components/navigation/AppFooter.vue')['default']
     Counter: typeof import('./components/dev/Counter.vue')['default']
-    DataSettings: typeof import('./components/user/DataSettings.vue')['default']
+    DataSettings: typeof import('./components/user/settings/sub-sections/DataSettings.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     LoginFIXME: typeof import('./components/user/LoginFIXME.vue')['default']
     Mansion: typeof import('./components/mansion/Mansion.vue')['default']
@@ -21,6 +21,7 @@ declare module 'vue' {
     RegisterFIXME: typeof import('./components/user/RegisterFIXME.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    Settings: typeof import('./components/user/Settings.vue')['default']
+    Settings: typeof import('./components/user/settings/Settings.vue')['default']
+    SettingsBar: typeof import('./components/user/settings/sub-sections/SettingsBar.vue')['default']
   }
 }
