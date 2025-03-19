@@ -26,6 +26,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { open } from '@tauri-apps/plugin-dialog'
+import { commands } from '@/bindings'
 
 defineProps<{
   isDialogOpen: boolean
@@ -33,9 +34,22 @@ defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:isDialogOpen', value: boolean): void
+  (e: 'update:dataFolder', value: string): void
 }>()
 
 const dataFolder = ref<string | null>(null)
+
+commands
+  .getSettingById(0)
+  .then((settings) => {
+    console.log(settings)
+    if (settings.status == 'ok') {
+      dataFolder.value = settings.data.db_path
+    }
+  })
+  .catch((error) => {
+    console.error('Promise rejected with error: ' + error)
+  })
 
 const openDirectoryPicker = async () => {
   try {
@@ -52,6 +66,7 @@ const openDirectoryPicker = async () => {
       // Store the selected directory path
       dataFolder.value = selected as string
       console.log(dataFolder.value)
+      emit('update:dataFolder', dataFolder.value)
     }
   } catch (error) {
     console.error('Error selecting directory:', error)
@@ -59,6 +74,4 @@ const openDirectoryPicker = async () => {
     emit('update:isDialogOpen', false) // Notify parent that dialog is closed
   }
 }
-
-defineExpose({ dataFolder })
 </script>

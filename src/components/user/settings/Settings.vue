@@ -49,6 +49,12 @@
               :selected-section="selectedSection"
               v-model="isDialogOpen"
               @update:selectedSection="(value) => (selectedSection = value)"
+              @update:dataFolder="
+                (value) => {
+                  console.log('Updated dataFolder:', value)
+                  settings.db_path = value
+                }
+              "
             ></SettingsBar>
             <v-divider class="mt-2"></v-divider>
 
@@ -88,8 +94,13 @@ import { ref } from 'vue'
 import { commands, type Setting } from '@/bindings'
 
 const selectedSection = ref('Data')
-const dataSettings = ref()
-const isDialogOpen = ref(false) // Track dialog state
+const settings = ref<Setting>({
+  id: -1,
+  db_path: 'some path',
+  profile: 'meh',
+  theme: 'light',
+})
+const isDialogOpen = ref(false)
 
 const alert = ref<{
   show: boolean
@@ -102,15 +113,10 @@ const alert = ref<{
 })
 
 function applySettings() {
-  if (dataSettings.value) {
-    let setting: Setting = {
-      id: 0,
-      db_path: dataSettings.value.dataFolder,
-      profile: 'meh',
-      theme: 'light',
-    }
+  console.log(settings.value)
+  if (settings.value.db_path != 'some path') {
     commands
-      .saveSetting(setting)
+      .saveSetting(settings.value)
       .then((setting) => {
         if (setting) {
           alert.value = {
@@ -133,7 +139,7 @@ function applySettings() {
     alert.value = {
       show: true,
       type: 'error',
-      message: 'Failed to apply settings.',
+      message: 'No dataSettings.',
     }
   }
 }

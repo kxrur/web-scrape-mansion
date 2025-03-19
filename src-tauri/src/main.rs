@@ -68,6 +68,7 @@ fn main() {
         .setup(move |app| {
             builder.mount_events(app);
             app.manage(Mutex::new(AppState::default()));
+            let _ = get_settings(app.state());
             Ok(())
         })
         .run(tauri::generate_context!())

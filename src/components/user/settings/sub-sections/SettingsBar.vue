@@ -32,6 +32,12 @@
         ref="dataSettings"
         :isDialogOpen="modelValue"
         @update:isDialogOpen="(value) => $emit('update:modelValue', value)"
+        @update:dataFolder="
+          (value) => () => {
+            console.log('Data folder updated:', value)
+            $emit('update:dataFolder', value)
+          }
+        "
       />
       <AppearanceSettings v-else-if="selectedSection === 'Appearance'" />
     </v-col>
@@ -39,9 +45,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import DataSettings from './DataSettings.vue'
-import AppearanceSettings from './AppearanceSettings.vue'
+defineEmits<{
+  (e: 'update:modelValue', value: boolean): void
+  (e: 'update:selectedSection', value: string): void
+  (e: 'update:dataFolder', value: string | null): void
+}>()
 
 defineProps({
   selectedSection: {
@@ -53,5 +61,4 @@ defineProps({
     required: true,
   },
 })
-defineEmits(['update:modelValue', 'update:selectedSection'])
 </script>
