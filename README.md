@@ -93,3 +93,5 @@ Copyright (c) 2016-present Vuetify, LLC
   - used for the `chromedriver --port=44444` server
 - PostgreSQL
   - always required
+- Vue Dev Tools
+  - used to debug frontend events: `sudo npm add -g @vue/devtools`

@@ -10,10 +10,6 @@ import pinia from '../stores'
 import router from '../router'
 import { devtools } from '@vue/devtools'
 
-if (process.env.NODE_ENV === 'development') {
-  devtools.connect()
-}
-
 // Types
 import type { App } from 'vue'
 
