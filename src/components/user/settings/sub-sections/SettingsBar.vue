@@ -8,7 +8,7 @@
           color="primary"
           base-color=""
           @click="$emit('update:selectedSection', 'Data')"
-          :disabled="modelValue"
+          :disabled="isDialogOpen"
         >
           <v-list-item-title>Data</v-list-item-title>
         </v-list-item>
@@ -19,7 +19,7 @@
           color="primary"
           base-color=""
           @click="$emit('update:selectedSection', 'Appearance')"
-          :disabled="modelValue"
+          :disabled="isDialogOpen"
         >
           <v-list-item-title>Appearance</v-list-item-title>
         </v-list-item>
@@ -29,12 +29,16 @@
     <v-col cols="9">
       <DataSettings
         v-if="selectedSection === 'Data'"
-        ref="dataSettings"
-        :isDialogOpen="modelValue"
-        @update:isDialogOpen="(value) => $emit('update:modelValue', value)"
+        @update:isDialogOpen="
+          (value) => {
+            isDialogOpen = value
+            $emit('update:isDialogOpen', value)
+          }
+        "
         @update:dataFolder="
-          (value) => () => {
+          (value) => {
             console.log('Data folder updated:', value)
+            dataPath = value
             $emit('update:dataFolder', value)
           }
         "
@@ -46,18 +50,17 @@
 
 <script setup lang="ts">
 defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
+  (e: 'update:isDialogOpen', value: boolean): void
   (e: 'update:selectedSection', value: string): void
-  (e: 'update:dataFolder', value: string | null): void
+  (e: 'update:dataFolder', value: string): void
 }>()
+
+const isDialogOpen = ref<boolean>(false)
+const dataPath = ref<string>('hui')
 
 defineProps({
   selectedSection: {
     type: String,
-    required: true,
-  },
-  modelValue: {
-    type: Boolean,
     required: true,
   },
 })

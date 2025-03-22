@@ -70,7 +70,7 @@ pub fn get_settings(state: tauri::State<'_, Mutex<AppState>>) -> Option<Vec<Sett
         .load::<Setting>(connection)
     {
         Ok(all_settings) => {
-            if all_settings.len() > 1 {
+            if !all_settings.is_empty() {
                 let mut state = state.lock().unwrap();
                 state.settings = all_settings.clone();
             }

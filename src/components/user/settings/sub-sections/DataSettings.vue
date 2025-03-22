@@ -28,9 +28,7 @@ import { ref } from 'vue'
 import { open } from '@tauri-apps/plugin-dialog'
 import { commands } from '@/bindings'
 
-defineProps<{
-  isDialogOpen: boolean
-}>()
+const isDialogOpen = ref<boolean>(false)
 
 const emit = defineEmits<{
   (e: 'update:isDialogOpen', value: boolean): void
@@ -53,7 +51,8 @@ commands
 
 const openDirectoryPicker = async () => {
   try {
-    emit('update:isDialogOpen', true) // Notify parent that dialog is open
+    isDialogOpen.value = true
+    emit('update:isDialogOpen', isDialogOpen.value)
 
     // Open a directory picker
     const selected = await open({
@@ -65,13 +64,13 @@ const openDirectoryPicker = async () => {
     if (selected) {
       // Store the selected directory path
       dataFolder.value = selected as string
-      console.log(dataFolder.value)
       emit('update:dataFolder', dataFolder.value)
     }
   } catch (error) {
     console.error('Error selecting directory:', error)
   } finally {
-    emit('update:isDialogOpen', false) // Notify parent that dialog is closed
+    isDialogOpen.value = false
+    emit('update:isDialogOpen', isDialogOpen.value)
   }
 }
 </script>

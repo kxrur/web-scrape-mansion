@@ -47,7 +47,7 @@
           <v-card-text>
             <SettingsBar
               :selected-section="selectedSection"
-              v-model="isDialogOpen"
+              @update:is-dialog-open="(value) => (isDialogOpen = value)"
               @update:selectedSection="(value) => (selectedSection = value)"
               @update:dataFolder="
                 (value) => {
