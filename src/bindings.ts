@@ -58,6 +58,9 @@ async getSettingById(id: number) : Promise<Result<Setting, Error>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async updateSetting(setting: Setting) : Promise<number | null> {
+    return await TAURI_INVOKE("update_setting", { setting });
 }
 }
 

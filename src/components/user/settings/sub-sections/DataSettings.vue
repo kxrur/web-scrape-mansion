@@ -40,7 +40,7 @@ const dataFolder = ref<string | null>(null)
 commands
   .getSettingById(0)
   .then((settings) => {
-    console.log(settings)
+    console.log('settings', settings)
     if (settings.status == 'ok') {
       dataFolder.value = settings.data.db_path
     }
@@ -62,7 +62,6 @@ const openDirectoryPicker = async () => {
     })
 
     if (selected) {
-      // Store the selected directory path
       dataFolder.value = selected as string
       emit('update:dataFolder', dataFolder.value)
     }

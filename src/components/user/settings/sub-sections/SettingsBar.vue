@@ -35,13 +35,7 @@
             $emit('update:isDialogOpen', value)
           }
         "
-        @update:dataFolder="
-          (value) => {
-            console.log('Data folder updated:', value)
-            dataPath = value
-            $emit('update:dataFolder', value)
-          }
-        "
+        @update:dataFolder="(value) => $emit('update:dataFolder', value)"
       />
       <AppearanceSettings v-else-if="selectedSection === 'Appearance'" />
     </v-col>
@@ -56,7 +50,6 @@ defineEmits<{
 }>()
 
 const isDialogOpen = ref<boolean>(false)
-const dataPath = ref<string>('hui')
 
 defineProps({
   selectedSection: {

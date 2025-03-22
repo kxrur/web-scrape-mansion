@@ -6,7 +6,10 @@ use crate::AppState;
 
 use super::{
     models::{Mansionee, NewMansionee, NewSetting, Setting},
-    schema::{mansionees, settings},
+    schema::{
+        mansionees,
+        settings::{self, id},
+    },
 };
 use diesel::prelude::*;
 
@@ -77,7 +80,25 @@ pub fn get_settings(state: tauri::State<'_, Mutex<AppState>>) -> Option<Vec<Sett
             Some(all_settings)
         }
         Err(e) => {
-            println!("Error loading the mansions: {}", e);
+            println!("Error loading the settings: {}", e);
+            None
+        }
+    }
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn update_setting(setting: Setting) -> Option<u32> {
+    let connection = &mut establish_connection();
+
+    match diesel::update(settings::table)
+        .filter(id.eq(setting.id))
+        .set(&setting)
+        .execute(connection)
+    {
+        Ok(num_rows) => Some(num_rows as u32),
+        Err(e) => {
+            println!("Error updating the setting: {}", e);
             None
         }
     }

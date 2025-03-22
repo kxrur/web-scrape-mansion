@@ -49,12 +49,7 @@
               :selected-section="selectedSection"
               @update:is-dialog-open="(value) => (isDialogOpen = value)"
               @update:selectedSection="(value) => (selectedSection = value)"
-              @update:dataFolder="
-                (value) => {
-                  console.log('Updated dataFolder:', value)
-                  settings.db_path = value
-                }
-              "
+              @update:dataFolder="(value) => (settings.db_path = value)"
             ></SettingsBar>
             <v-divider class="mt-2"></v-divider>
 
@@ -95,8 +90,8 @@ import { commands, type Setting } from '@/bindings'
 
 const selectedSection = ref('Data')
 const settings = ref<Setting>({
-  id: -1,
-  db_path: 'some path',
+  id: 1,
+  db_path: 'meh',
   profile: 'meh',
   theme: 'light',
 })
@@ -116,19 +111,34 @@ function applySettings() {
   console.log(settings.value)
   if (settings.value.db_path != 'some path') {
     commands
-      .saveSetting(settings.value)
-      .then((setting) => {
-        if (setting) {
+      .updateSetting(settings.value)
+      .then((rows) => {
+        if (rows == 1) {
           alert.value = {
             show: true,
             type: 'success',
             message: 'Settings applied successfully!',
           }
+        } else if (rows == 0) {
+          commands
+            .saveSetting(settings.value)
+            .then((setting) => {
+              if (setting) {
+                alert.value = {
+                  show: true,
+                  type: 'success',
+                  message: 'Settings saved successfully!',
+                }
+              }
+            })
+            .catch((error) => {
+              console.error('Promise rejected with error: ' + error)
+            })
         } else {
           alert.value = {
             show: true,
-            type: 'error',
-            message: 'Failed to apply settings.',
+            type: 'info',
+            message: 'More than one user affected!',
           }
         }
       })

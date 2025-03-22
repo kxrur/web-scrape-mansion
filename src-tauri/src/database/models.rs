@@ -125,7 +125,16 @@ pub struct NewSetting {
 }
 
 #[derive(
-    Serialize, Deserialize, Queryable, Selectable, Debug, Insertable, Clone, Type, Default,
+    Serialize,
+    Deserialize,
+    Queryable,
+    Selectable,
+    Debug,
+    Insertable,
+    Clone,
+    Type,
+    Default,
+    AsChangeset,
 )]
 #[diesel(table_name = settings)]
 pub struct Setting {
