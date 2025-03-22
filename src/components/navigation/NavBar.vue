@@ -57,6 +57,12 @@ const links = [
     to: '/mansions',
   },
   {
+    icon: 'mdi-plus-box-multiple-outline',
+    title: 'Add Mansion',
+    value: 'shared',
+    to: '/add-mansion',
+  },
+  {
     icon: 'mdi-information-box-outline',
     title: 'About',
     value: 'shared',

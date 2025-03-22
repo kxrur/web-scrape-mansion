@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AddMansionFIXME: typeof import('./components/mansion/AddMansionFIXME.vue')['default']
     AllMansions: typeof import('./components/mansion/AllMansions.vue')['default']
     AppearanceSettings: typeof import('./components/user/settings/sub-sections/AppearanceSettings.vue')['default']
     AppFooter: typeof import('./components/navigation/AppFooter.vue')['default']
