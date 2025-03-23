@@ -6,13 +6,14 @@
       class="carousel-skeleton"
     ></v-skeleton-loader>
 
-    <v-carousel v-else show-arrows="hover">
+    <v-carousel v-else show-arrows="hover" :hide-delimiters="true">
       <v-carousel-item
+        rounded="xl"
         v-for="(image, index) in images"
         :key="index"
         :src="image"
         cover
-      />
+      ></v-carousel-item>
     </v-carousel>
   </v-col>
 </template>

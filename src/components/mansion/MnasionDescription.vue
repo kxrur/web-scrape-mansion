@@ -1,13 +1,13 @@
 <template>
   <v-col cols="4">
-    <v-sheet class="pa-4 ma-2">
+    <v-sheet class="pa-4 ma-2" color="transparent">
       <template v-if="!mansion">
         <v-skeleton-loader
           type="list-item-avatar-two-line, list-item-two-line, list-item-two-line, list-item-two-line, list-item-two-line"
         ></v-skeleton-loader>
       </template>
 
-      <v-list v-else>
+      <v-list v-else rounded="xl" bg-color="primary-darken-1">
         <v-list-item>
           <v-list-item-title class="text-h6">Mansion Details</v-list-item-title>
         </v-list-item>

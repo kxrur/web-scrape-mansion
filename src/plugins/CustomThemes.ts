@@ -19,10 +19,10 @@ export const customThemes: { [key: string]: ThemeDefinition } = {
   mehe: {
     dark: true,
     colors: {
-      background: '#19323C', // Gunmetal
-      surface: '#8C5E58', // Rose taupe
+      background: '#12252E', // Rose taupe
+      surface: '#19323C', // Gunmetal
       primary: '#A93F55', // Amaranth purple
-      'primary-darken-1': '#AB8476', // Beaver
+      'primary-darken-1': '#8C5E58', // Beaver
       secondary: '#F3F7F0', // Mint cream
       'secondary-darken-1': '#6200EE',
       error: '#CF6679',
