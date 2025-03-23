@@ -53,7 +53,9 @@ fn main() {
             get_settings,
             save_setting,
             get_setting_by_id,
-            update_setting
+            update_setting,
+            get_store_mansions,
+            add_mansion
         ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
@@ -69,7 +71,10 @@ fn main() {
         .setup(move |app| {
             builder.mount_events(app);
             app.manage(Mutex::new(AppState::default()));
+
             let _ = get_settings(app.state());
+            let _ = load_database_mansions(app.state());
+
             Ok(())
         })
         .run(tauri::generate_context!())
@@ -83,9 +88,35 @@ fn _greet(name: &str) -> String {
 
 #[tauri::command]
 #[specta::specta] // < You must annotate your commands
-async fn load_mansions(
+async fn add_mansion(
     state: tauri::State<'_, Mutex<AppState>>,
-) -> Result<Vec<NewMansionee>, Error> {
+    url: String,
+) -> Result<Mansionee, Error> {
+    match scrape_one_mansion(url.clone()).await {
+        Ok(mansion) => {
+            let mut state = state.lock().unwrap();
+            state.mansions.push(mansion.clone());
+            Ok(mansion)
+        }
+        Err(e) => {
+            println!("failed to scrape mansion with url: {}", &url);
+            Err(e)
+        }
+    }
+}
+
+#[tauri::command]
+#[specta::specta] // < You must annotate your commands
+async fn get_store_mansions(
+    state: tauri::State<'_, Mutex<AppState>>,
+) -> Result<Vec<Mansionee>, Error> {
+    let state = state.lock().unwrap();
+    Ok(state.mansions.clone())
+}
+
+#[tauri::command]
+#[specta::specta] // < You must annotate your commands
+async fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<Mansionee>, Error> {
     let n = 3;
 
     match n {
@@ -114,7 +145,7 @@ async fn load_mansions(
 
 #[tauri::command]
 #[specta::specta] // < You must annotate your commands
-async fn load_all_url_mansions() -> Result<Vec<NewMansionee>, Error> {
+async fn load_all_url_mansions() -> Result<Vec<Mansionee>, Error> {
     test_massive_scrape().await
 }
 

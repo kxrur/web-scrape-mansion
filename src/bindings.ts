@@ -5,7 +5,7 @@
 
 
 export const commands = {
-async loadMansions() : Promise<Result<NewMansionee[], Error>> {
+async loadMansions() : Promise<Result<Mansionee[], Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("load_mansions") };
 } catch (e) {
@@ -21,7 +21,7 @@ async loadDatabaseMansions() : Promise<Result<Mansionee[], Error>> {
     else return { status: "error", error: e  as any };
 }
 },
-async loadAllUrlMansions() : Promise<Result<NewMansionee[], Error>> {
+async loadAllUrlMansions() : Promise<Result<Mansionee[], Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("load_all_url_mansions") };
 } catch (e) {
@@ -37,7 +37,7 @@ async getMansionById(id: number) : Promise<Result<Mansionee, Error>> {
     else return { status: "error", error: e  as any };
 }
 },
-async scrapeOneMansion(url: string) : Promise<Result<NewMansionee, Error>> {
+async scrapeOneMansion(url: string) : Promise<Result<Mansionee, Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("scrape_one_mansion", { url }) };
 } catch (e) {
@@ -61,6 +61,22 @@ async getSettingById(id: number) : Promise<Result<Setting, Error>> {
 },
 async updateSetting(setting: Setting) : Promise<number | null> {
     return await TAURI_INVOKE("update_setting", { setting });
+},
+async getStoreMansions() : Promise<Result<Mansionee[], Error>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_store_mansions") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async addMansion(url: string) : Promise<Result<Mansionee, Error>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_mansion", { url }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -74,10 +90,9 @@ async updateSetting(setting: Setting) : Promise<number | null> {
 
 /** user-defined types **/
 
-export type Error = { Network: string } | { Parsing: string }
+export type Error = { Network: string } | { Parsing: string } | { Scraping: string }
 export type JsonValue = null | boolean | number | string | JsonValue[] | { [key in string]: JsonValue }
 export type Mansionee = { id: number; uuid: string; address: string; price: number | null; size: number | null; bedrooms: number | null; bathrooms: number | null; receptions: number | null; house_type: string; pictures: JsonValue | null }
-export type NewMansionee = { address: string; price: number | null; size: number | null; bedrooms: number | null; bathrooms: number | null; receptions: number | null; house_type: string; pictures: JsonValue | null }
 export type NewSetting = { profile: string | null; theme: string | null; db_path: string | null }
 export type Setting = { id: number; profile: string | null; theme: string | null; db_path: string | null }
 

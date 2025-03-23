@@ -4,8 +4,8 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
 
-use crate::database::models::{NewMansionee, Picture};
-use crate::database::postgresql::save_mansionee;
+use crate::database::models::{Mansionee, NewMansionee, Picture};
+use crate::database::postgresql::save_mansionee_to_database;
 use crate::scrape::{
     action::close_cookie,
     save::{download_image, save_data_url_as_image},
@@ -33,7 +33,7 @@ pub async fn setup_driver(server_url: String) -> WebDriver {
         .expect("Failed to load driver")
 }
 
-pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<(NewMansionee)> {
+pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<(Mansionee)> {
     println!("{}", url);
     driver.goto(&url).await?;
     close_cookie(driver, &url).await;
@@ -74,10 +74,10 @@ pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<
         );
         mansion.log();
 
-        let mansionee = save_mansionee(mansion.clone());
+        let mansionee = save_mansionee_to_database(mansion.clone());
         mansionee.log();
 
-        Ok(mansion)
+        Ok(mansionee)
     } else {
         Err(WebDriverError::NotFound(url, "".to_string()))
     }
@@ -101,13 +101,12 @@ async fn eval_price(driver: &WebDriver) -> Result<i32, WebDriverError> {
     price_str.retain(|c| c.is_ascii_digit()); // remove trailing spaces / parentheses
 
     let price = match price_str.parse::<i32>() {
-        Ok(it) => Some(it),
+        Ok(it) => it,
         Err(_e) => {
             println!("failed on: {price_str}");
-            None
+            -1
         }
-    }
-    .unwrap();
+    };
 
     println!("price: {}", price);
     Ok(price)

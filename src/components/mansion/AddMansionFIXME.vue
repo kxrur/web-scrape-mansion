@@ -43,7 +43,7 @@ async function onClick() {
   result.value = null
 
   try {
-    const response = await commands.scrapeOneMansion(url.value)
+    const response = await commands.addMansion(url.value)
     if (response.status === 'ok') {
       result.value = response.data
     }

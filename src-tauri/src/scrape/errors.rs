@@ -6,6 +6,8 @@ pub enum Error {
     Network(String),
     #[error("Parsing error: {0}")]
     Parsing(String),
+    #[error("Scraping error: {0}")]
+    Scraping(String),
     // Add other error variants as needed
 }
 

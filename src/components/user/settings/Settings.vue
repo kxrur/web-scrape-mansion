@@ -89,6 +89,7 @@ import { ref } from 'vue'
 import { commands, type Setting } from '@/bindings'
 
 const selectedSection = ref('Data')
+//FIXME: make this use the setting stored in the Store
 const settings = ref<Setting>({
   id: 1,
   db_path: 'meh',

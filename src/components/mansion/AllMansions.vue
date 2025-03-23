@@ -50,9 +50,13 @@ const mansions = ref<Mansionee[]>()
 const first_pictures = ref<string[]>([])
 
 onMounted(async () => {
+  loadMansions()
+})
+
+async function loadMansions() {
   try {
     console.log('start loading mansions')
-    const result = await commands.loadDatabaseMansions()
+    const result = await commands.getStoreMansions()
     console.log('finish loading mansions')
 
     if (result.status === 'ok') {
@@ -86,5 +90,5 @@ onMounted(async () => {
   } catch (error) {
     console.error('Unexpected error:', error)
   }
-})
+}
 </script>

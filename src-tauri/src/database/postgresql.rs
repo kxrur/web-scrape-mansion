@@ -20,12 +20,12 @@ pub fn establish_connection() -> PgConnection {
     PgConnection::establish(&database_url)
         .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
-pub fn save_mansionee(new_mansion: NewMansionee) -> NewMansionee {
+pub fn save_mansionee_to_database(new_mansion: NewMansionee) -> Mansionee {
     let conn = &mut establish_connection();
 
     diesel::insert_into(mansionees::table)
         .values(&new_mansion)
-        .returning(NewMansionee::as_returning())
+        .returning(Mansionee::as_returning())
         .get_result(conn)
         .expect("Error saving new mansion")
 }
