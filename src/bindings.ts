@@ -77,6 +77,14 @@ async addMansion(url: string) : Promise<Result<Mansionee, Error>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async getMansionStateIdByDatabaseId(mansionee: Mansionee) : Promise<Result<number, Error>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_mansion_state_id_by_database_id", { mansionee }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 

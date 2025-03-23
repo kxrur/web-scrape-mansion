@@ -55,7 +55,8 @@ fn main() {
             get_setting_by_id,
             update_setting,
             get_store_mansions,
-            add_mansion
+            add_mansion,
+            get_mansion_state_id_by_database_id
         ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
@@ -161,6 +162,24 @@ fn load_database_mansions(
 }
 
 #[tauri::command]
+#[specta::specta] // < You must annotate your commands
+fn get_mansion_state_id_by_database_id(
+    mansionee: Mansionee,
+    state: tauri::State<'_, Mutex<AppState>>,
+) -> Result<i32, Error> {
+    let state = state.lock().unwrap();
+    for (index, mansion) in state.mansions.iter().enumerate() {
+        if mansion.uuid == mansionee.uuid {
+            return Ok(index as i32);
+        }
+    }
+    Err(Error::Parsing(format!(
+        "did not find mansion with database id: {} in the store",
+        mansionee.id
+    )))
+}
+
+#[tauri::command]
 #[specta::specta]
 fn get_mansion_by_id(
     id: u32,
@@ -170,7 +189,7 @@ fn get_mansion_by_id(
     match state.mansions.get(id as usize) {
         Some(mansion) => Ok(mansion.clone()),
         None => Err(Error::Parsing(format!(
-            "did not found mansion with id: {}",
+            "did not find mansion with id: {}",
             id
         ))),
     }

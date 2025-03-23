@@ -1,55 +1,106 @@
 <template>
-  <v-card class="mx-auto mt-10" color="surface-light" max-width="400">
-    <v-card-text>
-      <v-text-field
-        v-model="url"
-        :loading="loading"
-        append-inner-icon="mdi-magnify"
-        density="compact"
-        label="Search templates"
-        variant="solo"
-        hide-details
-        single-line
-        @click:append-inner="onClick"
-      ></v-text-field>
-      <v-alert v-if="error" type="error" class="mt-3">
-        {{ error }}
-      </v-alert>
-      <v-alert v-if="result" type="success" class="mt-3">
-        Successfully scraped: {{ result }}
-      </v-alert>
-    </v-card-text>
-  </v-card>
+  <div>
+    <v-snackbar
+      v-model="alert.show"
+      :color="alert.type"
+      :timeout="3000"
+      location="top right"
+    >
+      {{ alert.message }}
+
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="alert.show = false"
+          icon="mdi-close"
+        ></v-btn>
+      </template>
+    </v-snackbar>
+    <v-card class="mx-auto mt-10" color="surface-light" max-width="400">
+      <v-card-text>
+        <v-text-field
+          v-model="url"
+          :loading="loading"
+          append-inner-icon="mdi-magnify"
+          density="compact"
+          label="Search templates"
+          variant="solo"
+          hide-details
+          single-line
+          @click:append-inner="search"
+        ></v-text-field>
+      </v-card-text>
+    </v-card>
+    <div v-if="mansion && id">
+      <v-container class="fill-height">
+        <v-responsive class="align-center fill-height">
+          <v-row no-gutters>
+            <MansionImages :id="id.toString()"></MansionImages>
+            <MnasionDescription :id="id.toString()"></MnasionDescription>
+          </v-row>
+        </v-responsive>
+      </v-container>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { commands } from '@/bindings'
+import { commands, type Mansionee } from '@/bindings'
 import { ref } from 'vue'
 
-let loading = ref(false)
-let loaded = ref(false)
-let url = ref('')
-let error = ref<string | null>(null)
-let result = ref<any>(null)
+const loading = ref(false)
+const loaded = ref(false)
+const url = ref('')
+const mansion = ref<Mansionee>()
+const id = ref<number>()
 
-async function onClick() {
+const alert = ref<{
+  show: boolean
+  type: 'success' | 'error' | 'info' | 'warning' | undefined
+  message: string
+}>({
+  show: false,
+  type: undefined,
+  message: '',
+})
+
+async function search() {
   if (!url.value) {
-    error.value = 'Please enter a URL.'
+    alert.value.message = 'Please enter a URL!'
+    alert.value.type = 'warning'
+    alert.value.show = true
     return
   }
 
+  mansion.value = undefined
+  id.value = undefined
+
   loading.value = true
-  error.value = null
-  result.value = null
 
   try {
-    const response = await commands.addMansion(url.value)
-    if (response.status === 'ok') {
-      result.value = response.data
+    const mansionee = await commands.addMansion(url.value)
+    if (mansionee.status === 'ok') {
+      let idee = await commands.getMansionStateIdByDatabaseId(mansionee.data)
+      if (idee.status === 'ok') {
+        mansion.value = mansionee.data
+        id.value = idee.data
+
+        alert.value.message = 'Success scraping mansion!'
+        alert.value.type = 'success'
+        alert.value.show = true
+      } else {
+        throw Error
+      }
     }
   } catch (e) {
-    error.value =
-      e instanceof Error ? e.message : 'An unexpected error occurred.'
+    alert.value.message =
+      e instanceof Error ? e.message : 'An unexpected error occurred!'
+    alert.value.type = 'error'
+    alert.value.show = true
+
+    mansion.value = undefined
+    id.value = undefined
   } finally {
     loading.value = false
     loaded.value = true
