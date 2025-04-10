@@ -37,11 +37,9 @@ impl NewMansionee {
         bathrooms: Option<i32>,
         receptions: Option<i32>,
         house_type: String,
-        pictures: Vec<Picture>,
-    ) -> (Self, Vec<Picture>) {
-        let uuid = Uuid::new_v4();
-
-        let new_mansionee = NewMansionee {
+        uuid: Vec<u8>,
+    ) -> Self {
+        NewMansionee {
             address,
             price,
             size,
@@ -49,10 +47,8 @@ impl NewMansionee {
             bathrooms,
             receptions,
             house_type,
-            uuid: uuid.as_bytes().to_vec(),
-        };
-
-        (new_mansionee, pictures)
+            uuid,
+        }
     }
 
     pub fn log(&self) {

@@ -5,9 +5,9 @@ use std::{env, panic, sync::Mutex};
 use crate::AppState;
 
 use super::{
-    models::{Mansionee, NewMansionee, NewSetting, Setting},
+    models::{DbPicture, Mansionee, NewMansionee, NewPicture, NewSetting, Setting},
     schema::{
-        mansionees,
+        mansionees, pictures,
         settings::{self, id},
     },
 };
@@ -28,6 +28,21 @@ pub fn save_mansionee_to_database(new_mansion: NewMansionee) -> Mansionee {
         .returning(Mansionee::as_returning())
         .get_result(conn)
         .expect("Error saving new mansion")
+}
+
+pub fn save_pictures_to_database(new_pictures: Vec<NewPicture>) -> Vec<DbPicture> {
+    let conn = &mut establish_connection();
+    let mut pictures: Vec<DbPicture> = Vec::new();
+
+    for new_picture in new_pictures {
+        let picture = diesel::insert_into(pictures::table)
+            .values(&new_picture)
+            .returning(DbPicture::as_returning())
+            .get_result(conn)
+            .expect("Error saving picture");
+        pictures.push(picture);
+    }
+    pictures
 }
 
 pub fn get_mansionees() -> Option<Vec<Mansionee>> {

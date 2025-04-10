@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
 
 use crate::database::models::{Mansionee, NewMansionee, Picture};
-use crate::database::postgresql::save_mansionee_to_database;
+use crate::database::sqlite::save_mansionee_to_database;
 use crate::scrape::{
     action::close_cookie,
     save::{download_image, save_data_url_as_image},
