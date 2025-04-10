@@ -2,7 +2,7 @@
 
 diesel::table! {
     mansionees (id) {
-        id -> Nullable<Integer>,
+        id -> Integer,
         address -> Text,
         price -> Nullable<Integer>,
         size -> Nullable<Float>,
@@ -16,10 +16,19 @@ diesel::table! {
 
 diesel::table! {
     pictures (id) {
-        id -> Nullable<Integer>,
+        id -> Integer,
         mansionees_id -> Integer,
         name -> Text,
         path -> Text,
+    }
+}
+
+diesel::table! {
+    settings (id) {
+        id -> Integer,
+        profile -> Nullable<Text>,
+        theme -> Nullable<Text>,
+        db_path -> Nullable<Text>,
     }
 }
 
@@ -28,4 +37,5 @@ diesel::joinable!(pictures -> mansionees (mansionees_id));
 diesel::allow_tables_to_appear_in_same_query!(
     mansionees,
     pictures,
+    settings,
 );

@@ -1,6 +1,6 @@
 -- Your SQL goes here
 CREATE TABLE mansionees (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     address TEXT NOT NULL,
     price INTEGER,
     size REAL,

@@ -1,6 +1,6 @@
 -- Your SQL goes here
 CREATE TABLE pictures (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     mansionees_id INTEGER NOT NULL,
     name TEXT NOT NULL,
     path TEXT NOT NULL,
