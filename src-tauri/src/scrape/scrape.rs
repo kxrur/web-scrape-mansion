@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
 
 use crate::database::models::{Mansionee, NewMansionee, Picture};
-use crate::database::sqlite::save_mansionee_to_database;
+use crate::database::sqlite::save_mansionee;
 use crate::scrape::{
     action::close_cookie,
     save::{download_image, save_data_url_as_image},
@@ -74,7 +74,7 @@ pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<
         );
         mansion.log();
 
-        let mansionee = save_mansionee_to_database(mansion.clone());
+        let mansionee = save_mansionee(mansion.clone());
         mansionee.log();
 
         Ok(mansionee)

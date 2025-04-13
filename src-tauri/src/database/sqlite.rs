@@ -20,29 +20,40 @@ pub fn establish_connection() -> SqliteConnection {
     SqliteConnection::establish(&database_url)
         .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
-pub fn save_mansionee_to_database(new_mansion: NewMansionee) -> Mansionee {
+pub fn save_mansionee(new_mansion: NewMansionee) -> Option<Mansionee> {
     let conn = &mut establish_connection();
 
-    diesel::insert_into(mansionees::table)
+    match diesel::insert_into(mansionees::table)
         .values(&new_mansion)
         .returning(Mansionee::as_returning())
         .get_result(conn)
-        .expect("Error saving new mansion")
+    {
+        Ok(mansion) => Some(mansion),
+        Err(e) => {
+            println!("error saving the mansion: {}", e);
+            None
+        }
+    }
 }
 
-pub fn save_pictures_to_database(new_pictures: Vec<NewPicture>) -> Vec<DbPicture> {
+pub fn save_pictures(new_pictures: Vec<NewPicture>) -> Option<Vec<DbPicture>> {
     let conn = &mut establish_connection();
     let mut pictures: Vec<DbPicture> = Vec::new();
 
     for new_picture in new_pictures {
-        let picture = diesel::insert_into(pictures::table)
+        let picture = match diesel::insert_into(pictures::table)
             .values(&new_picture)
             .returning(DbPicture::as_returning())
             .get_result(conn)
-            .expect("Error saving picture");
-        pictures.push(picture);
+        {
+            Ok(picture) => pictures.push(picture),
+            Err(e) => {
+                println!("error saving pictures: {}", e);
+                return None;
+            }
+        };
     }
-    pictures
+    Some(pictures)
 }
 
 pub fn get_mansionees() -> Option<Vec<Mansionee>> {
@@ -61,18 +72,31 @@ pub fn get_mansionees() -> Option<Vec<Mansionee>> {
     }
 }
 
-#[tauri::command]
-#[specta::specta]
-pub fn save_setting(new_setting: NewSetting) -> Option<Setting> {
+pub fn get_mansionee(mansion_id: i32) -> Option<Mansionee> {
+    use mansionees::dsl::mansionees;
     let connection = &mut establish_connection();
-    match diesel::insert_into(settings::table)
-        .values(&new_setting)
-        .returning(Setting::as_returning())
-        .get_result(connection)
+
+    mansionees
+        .find(mansion_id)
+        .select(Mansionee::as_select())
+        .first::<Mansionee>(connection)
+        .optional()
+        .unwrap_or_else(|e| {
+            println!("Error loading mansion {}: {}", mansion_id, e);
+            None
+        })
+}
+
+pub fn get_pictures(mansionee: &Mansionee) -> Option<Vec<DbPicture>> {
+    let connection = &mut establish_connection();
+
+    match DbPicture::belonging_to(mansionee)
+        .select(DbPicture::as_select())
+        .load(connection)
     {
-        Ok(setting) => Some(setting),
+        Ok(pics) => Some(pics),
         Err(e) => {
-            println!("Error saving the setting: {}", e);
+            println!("Error loading pictures for mansion {}: {}", mansionee.id, e);
             None
         }
     }
@@ -96,6 +120,23 @@ pub fn get_settings(state: tauri::State<'_, Mutex<AppState>>) -> Option<Vec<Sett
         }
         Err(e) => {
             println!("Error loading the settings: {}", e);
+            None
+        }
+    }
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn save_setting(new_setting: NewSetting) -> Option<Setting> {
+    let connection = &mut establish_connection();
+    match diesel::insert_into(settings::table)
+        .values(&new_setting)
+        .returning(Setting::as_returning())
+        .get_result(connection)
+    {
+        Ok(setting) => Some(setting),
+        Err(e) => {
+            println!("Error saving the setting: {}", e);
             None
         }
     }

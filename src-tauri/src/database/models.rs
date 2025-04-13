@@ -76,7 +76,7 @@ impl NewMansionee {
     }
 }
 
-#[derive(Serialize, Deserialize, Queryable, Selectable, Debug, Clone, Type)]
+#[derive(Serialize, Deserialize, Queryable, Selectable, Debug, Clone, Type, Identifiable)]
 #[diesel(table_name = mansionees)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Mansionee {
@@ -119,21 +119,23 @@ impl Mansionee {
     }
 }
 
-#[derive(Serialize, Deserialize, Queryable, Selectable, Debug, Insertable, Clone, Type)]
+#[derive(Serialize, Deserialize, Queryable, Selectable, Debug, Clone, Type, Insertable)]
 #[diesel(table_name = pictures)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct NewPicture {
-    pub mansionees_id: i32,
+    pub mansionee_id: i32,
     pub name: String,
     pub path: String,
 }
 
-#[derive(Serialize, Deserialize, Queryable, Selectable, Debug, Clone, Type)]
+#[derive(
+    Serialize, Deserialize, Queryable, Selectable, Debug, Clone, Type, Associations, Identifiable,
+)]
 #[diesel(table_name = pictures)]
+#[diesel(belongs_to(Mansionee))]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct DbPicture {
     pub id: i32,
-    pub mansionees_id: i32,
+    pub mansionee_id: i32,
     pub name: String,
     pub path: String,
 }
