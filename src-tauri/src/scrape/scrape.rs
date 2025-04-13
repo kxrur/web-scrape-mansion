@@ -4,6 +4,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
 
+use crate::database::mansion::{save_mansion, Mansion, NewMansion};
 use crate::database::models::{Mansionee, NewMansionee, Picture};
 use crate::database::sqlite::save_mansionee;
 use crate::scrape::{
@@ -33,7 +34,7 @@ pub async fn setup_driver(server_url: String) -> WebDriver {
         .expect("Failed to load driver")
 }
 
-pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<(Mansionee)> {
+pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<Mansion> {
     println!("{}", url);
     driver.goto(&url).await?;
     close_cookie(driver, &url).await;
@@ -62,7 +63,7 @@ pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<
         let house_type = eval_type(driver).await?;
 
         let pictures = eval_imgs(driver, &address1).await;
-        let mansion = NewMansionee::new(
+        let new_mansionee = NewMansionee::new(
             full_address,
             price,
             size,
@@ -70,12 +71,15 @@ pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<
             bathrooms,
             receptions,
             house_type,
-            pictures,
         );
-        mansion.log();
+        new_mansionee.log();
 
-        let mansionee = save_mansionee(mansion.clone());
-        mansionee.log();
+        let new_mansion = NewMansion {
+            mansion: new_mansionee,
+            pictures,
+        };
+
+        let mansionee = save_mansion(new_mansion).unwrap();
 
         Ok(mansionee)
     } else {
@@ -112,7 +116,7 @@ async fn eval_price(driver: &WebDriver) -> Result<i32, WebDriverError> {
     Ok(price)
 }
 
-async fn eval_size(driver: &WebDriver) -> Result<f64, WebDriverError> {
+async fn eval_size(driver: &WebDriver) -> Result<f32, WebDriverError> {
     let elem_size = driver.find(By::ClassName(SIZE_CS)).await?;
     let mut size_str = elem_size.text().await?;
     size_str.retain(|c| c != ',');
@@ -121,7 +125,7 @@ async fn eval_size(driver: &WebDriver) -> Result<f64, WebDriverError> {
     let caps = re.captures(&size_str).unwrap();
     size_str = caps["size"].to_string();
 
-    let size: f64 = size_str.parse().unwrap();
+    let size: f32 = size_str.parse().unwrap();
 
     println!("size: {} sq m", size_str);
     Ok(size)

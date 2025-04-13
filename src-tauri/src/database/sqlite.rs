@@ -41,7 +41,8 @@ pub fn save_pictures(new_pictures: Vec<NewPicture>) -> Option<Vec<DbPicture>> {
     let mut pictures: Vec<DbPicture> = Vec::new();
 
     for new_picture in new_pictures {
-        let picture = match diesel::insert_into(pictures::table)
+        println!("pushing picture?");
+        match diesel::insert_into(pictures::table)
             .values(&new_picture)
             .returning(DbPicture::as_returning())
             .get_result(conn)

@@ -1,17 +1,17 @@
 use super::{
-    models::{DbPicture, Mansionee, NewMansionee, NewPicture},
+    models::{DbPicture, Mansionee, NewMansionee, NewPicture, Picture},
     sqlite::{get_mansionee, get_mansionees, get_pictures, save_mansionee, save_pictures},
 };
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-#[derive(Debug, Serialize, Deserialize, Type)]
+#[derive(Debug, Serialize, Deserialize, Type, Clone)]
 pub struct MansionWithPictures<M, P> {
     pub mansion: M,
     pub pictures: Vec<P>,
 }
 
-pub type NewMansion = MansionWithPictures<NewMansionee, NewPicture>;
+pub type NewMansion = MansionWithPictures<NewMansionee, Picture>;
 pub type Mansion = MansionWithPictures<Mansionee, DbPicture>;
 
 impl Mansionee {
@@ -24,7 +24,7 @@ impl Mansionee {
 }
 
 impl NewMansionee {
-    pub fn with_pictures(self, pictures: Vec<NewPicture>) -> NewMansion {
+    pub fn with_pictures(self, pictures: Vec<Picture>) -> NewMansion {
         MansionWithPictures {
             mansion: self,
             pictures,
@@ -54,7 +54,22 @@ pub fn get_mansion(id: i32) -> Option<Mansion> {
 }
 
 pub fn save_mansion(new_mansion: NewMansion) -> Option<Mansion> {
-    let mansion = save_mansionee(new_mansion.mansion)?;
-    let pictures = save_pictures(new_mansion.pictures)?;
-    Some(Mansion { mansion, pictures })
+    let mansionee = save_mansionee(new_mansion.mansion)?;
+
+    let mut pictures: Vec<NewPicture> = Vec::new();
+    for picture in new_mansion.pictures.into_iter() {
+        pictures.push(NewPicture {
+            path: picture.path,
+            mansionee_id: mansionee.id,
+            name: picture.name,
+        })
+    }
+
+    println!("start picture saving");
+    let db_pictures = save_pictures(pictures)?;
+
+    Some(MansionWithPictures {
+        mansion: mansionee,
+        pictures: db_pictures,
+    })
 }

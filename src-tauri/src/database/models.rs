@@ -37,8 +37,8 @@ impl NewMansionee {
         bathrooms: Option<i32>,
         receptions: Option<i32>,
         house_type: String,
-        uuid: Vec<u8>,
     ) -> Self {
+        let uuid = Uuid::new_v4().as_bytes().to_vec();
         NewMansionee {
             address,
             price,
