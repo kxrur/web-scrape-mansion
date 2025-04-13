@@ -6,17 +6,20 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 
 #[derive(Debug, Serialize, Deserialize, Type, Clone)]
-pub struct MansionWithPictures<M, P> {
-    pub mansion: M,
-    pub pictures: Vec<P>,
+pub struct NewMansion {
+    pub mansion: NewMansionee,
+    pub pictures: Vec<Picture>,
 }
 
-pub type NewMansion = MansionWithPictures<NewMansionee, Picture>;
-pub type Mansion = MansionWithPictures<Mansionee, DbPicture>;
+#[derive(Debug, Serialize, Deserialize, Type, Clone)]
+pub struct Mansion {
+    pub mansion: Mansionee,
+    pub pictures: Vec<DbPicture>,
+}
 
 impl Mansionee {
     pub fn with_pictures(self, pictures: Vec<DbPicture>) -> Mansion {
-        MansionWithPictures {
+        Mansion {
             mansion: self,
             pictures,
         }
@@ -25,7 +28,7 @@ impl Mansionee {
 
 impl NewMansionee {
     pub fn with_pictures(self, pictures: Vec<Picture>) -> NewMansion {
-        MansionWithPictures {
+        NewMansion {
             mansion: self,
             pictures,
         }
@@ -68,7 +71,7 @@ pub fn save_mansion(new_mansion: NewMansion) -> Option<Mansion> {
     println!("start picture saving");
     let db_pictures = save_pictures(pictures)?;
 
-    Some(MansionWithPictures {
+    Some(Mansion {
         mansion: mansionee,
         pictures: db_pictures,
     })

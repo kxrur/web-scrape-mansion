@@ -24,7 +24,7 @@
               <v-card :to="`/mansions/${index}`">
                 <v-img :src="first_pictures[index]" height="200" cover />
                 <v-card-title>
-                  {{ mansion.address }}
+                  {{ mansion.mansion.address }}
                 </v-card-title>
               </v-card>
             </v-col>
@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { commands, type Mansionee } from '@/bindings'
+import { commands, type Mansion } from '@/bindings'
 import { convertFileSrc } from '@tauri-apps/api/core'
 
 // Define the structure of a Picture object
@@ -46,7 +46,7 @@ interface Picture {
   path: string
 }
 
-const mansions = ref<Mansionee[]>()
+const mansions = ref<Mansion[]>()
 const first_pictures = ref<string[]>([])
 
 onMounted(async () => {

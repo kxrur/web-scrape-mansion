@@ -5,7 +5,7 @@
 
 
 export const commands = {
-async loadMansions() : Promise<Result<(MansionWithPictures<Mansionee, DbPicture>)[], Error>> {
+async loadMansions() : Promise<Result<Mansion[], Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("load_mansions") };
 } catch (e) {
@@ -13,7 +13,7 @@ async loadMansions() : Promise<Result<(MansionWithPictures<Mansionee, DbPicture>
     else return { status: "error", error: e  as any };
 }
 },
-async loadDatabaseMansions() : Promise<Result<(MansionWithPictures<Mansionee, DbPicture>)[], Error>> {
+async loadDatabaseMansions() : Promise<Result<Mansion[], Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("load_database_mansions") };
 } catch (e) {
@@ -21,7 +21,7 @@ async loadDatabaseMansions() : Promise<Result<(MansionWithPictures<Mansionee, Db
     else return { status: "error", error: e  as any };
 }
 },
-async loadAllUrlMansions() : Promise<Result<(MansionWithPictures<Mansionee, DbPicture>)[], Error>> {
+async loadAllUrlMansions() : Promise<Result<Mansion[], Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("load_all_url_mansions") };
 } catch (e) {
@@ -29,7 +29,7 @@ async loadAllUrlMansions() : Promise<Result<(MansionWithPictures<Mansionee, DbPi
     else return { status: "error", error: e  as any };
 }
 },
-async getMansionById(id: number) : Promise<Result<MansionWithPictures<Mansionee, DbPicture>, Error>> {
+async getMansionById(id: number) : Promise<Result<Mansion, Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_mansion_by_id", { id }) };
 } catch (e) {
@@ -37,7 +37,7 @@ async getMansionById(id: number) : Promise<Result<MansionWithPictures<Mansionee,
     else return { status: "error", error: e  as any };
 }
 },
-async scrapeOneMansion(url: string) : Promise<Result<MansionWithPictures<Mansionee, DbPicture>, Error>> {
+async scrapeOneMansion(url: string) : Promise<Result<Mansion, Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("scrape_one_mansion", { url }) };
 } catch (e) {
@@ -62,7 +62,7 @@ async getSettingById(id: number) : Promise<Result<Setting, Error>> {
 async updateSetting(setting: Setting) : Promise<number | null> {
     return await TAURI_INVOKE("update_setting", { setting });
 },
-async getStoreMansions() : Promise<Result<(MansionWithPictures<Mansionee, DbPicture>)[], Error>> {
+async getStoreMansions() : Promise<Result<Mansion[], Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_store_mansions") };
 } catch (e) {
@@ -70,7 +70,7 @@ async getStoreMansions() : Promise<Result<(MansionWithPictures<Mansionee, DbPict
     else return { status: "error", error: e  as any };
 }
 },
-async addMansion(url: string) : Promise<Result<MansionWithPictures<Mansionee, DbPicture>, Error>> {
+async addMansion(url: string) : Promise<Result<Mansion, Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("add_mansion", { url }) };
 } catch (e) {
@@ -100,7 +100,7 @@ async getMansionStateIdByDatabaseId(mansionee: Mansionee) : Promise<Result<numbe
 
 export type DbPicture = { id: number; mansionee_id: number; name: string; path: string }
 export type Error = { Network: string } | { Parsing: string } | { Scraping: string }
-export type MansionWithPictures<M, P> = { mansion: M; pictures: P[] }
+export type Mansion = { mansion: Mansionee; pictures: DbPicture[] }
 export type Mansionee = { id: number; uuid: number[]; address: string; price: number | null; size: number | null; bedrooms: number | null; bathrooms: number | null; receptions: number | null; house_type: string }
 export type NewSetting = { profile: string | null; theme: string | null; db_path: string | null }
 export type Setting = { id: number; profile: string | null; theme: string | null; db_path: string | null }
