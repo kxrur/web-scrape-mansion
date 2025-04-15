@@ -34,4 +34,8 @@ diesel::table! {
 
 diesel::joinable!(pictures -> mansionees (mansionee_id));
 
-diesel::allow_tables_to_appear_in_same_query!(mansionees, pictures, settings,);
+diesel::allow_tables_to_appear_in_same_query!(
+    mansionees,
+    pictures,
+    settings,
+);

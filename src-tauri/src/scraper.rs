@@ -55,7 +55,6 @@ fn delete_all_imgs(path: &str) {
 #[tauri::command]
 #[specta::specta] // < You must annotate your commands
 pub async fn scrape_one_mansion(url: String) -> Result<Mansion, Error> {
-    delete_all_imgs("images");
     let driver = setup_driver("http://localhost:44444".to_string()).await;
     let result = match scrape_mansion(&driver, url.to_string()).await {
         Ok(mansion) => Ok(mansion),
