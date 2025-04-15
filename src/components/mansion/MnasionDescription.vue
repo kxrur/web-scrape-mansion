@@ -60,7 +60,7 @@ onMounted(async () => {
     const result = await commands.getMansionById(Number(props.id))
 
     if (result.status === 'ok') {
-      mansion.value = result.data
+      mansion.value = result.data.mansion
     } else {
       console.error(
         'Error loading mansion:',

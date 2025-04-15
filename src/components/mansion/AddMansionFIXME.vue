@@ -46,13 +46,13 @@
 </template>
 
 <script lang="ts" setup>
-import { commands, type Mansionee } from '@/bindings'
+import { commands, type Mansion } from '@/bindings'
 import { ref } from 'vue'
 
 const loading = ref(false)
 const loaded = ref(false)
 const url = ref('')
-const mansion = ref<Mansionee>()
+const mansion = ref<Mansion>()
 const id = ref<number>()
 
 const alert = ref<{
@@ -79,11 +79,13 @@ async function search() {
   loading.value = true
 
   try {
-    const mansionee = await commands.addMansion(url.value)
-    if (mansionee.status === 'ok') {
-      let idee = await commands.getMansionStateIdByDatabaseId(mansionee.data)
+    const new_mansion = await commands.addMansion(url.value)
+    if (new_mansion.status === 'ok') {
+      let idee = await commands.getMansionStateIdByDatabaseId(
+        new_mansion.data.mansion
+      )
       if (idee.status === 'ok') {
-        mansion.value = mansionee.data
+        mansion.value = new_mansion.data
         id.value = idee.data
 
         alert.value.message = 'Success scraping mansion!'

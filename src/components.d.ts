@@ -24,6 +24,5 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     Settings: typeof import('./components/user/settings/Settings.vue')['default']
     SettingsBar: typeof import('./components/user/settings/sub-sections/SettingsBar.vue')['default']
-    Test: typeof import('./components/mansion/test.vue')['default']
   }
 }

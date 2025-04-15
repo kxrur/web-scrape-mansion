@@ -2,29 +2,40 @@
 
 diesel::table! {
     mansionees (id) {
-        id -> Int4,
+        id -> Integer,
         address -> Text,
-        price -> Nullable<Int4>,
-        size -> Nullable<Float8>,
-        bedrooms -> Nullable<Int4>,
-        bathrooms -> Nullable<Int4>,
-        receptions -> Nullable<Int4>,
+        price -> Nullable<Integer>,
+        size -> Nullable<Float>,
+        bedrooms -> Nullable<Integer>,
+        bathrooms -> Nullable<Integer>,
+        receptions -> Nullable<Integer>,
         house_type -> Text,
-        pictures -> Nullable<Jsonb>,
-        uuid -> Uuid,
+        uuid -> Binary,
+    }
+}
+
+diesel::table! {
+    pictures (id) {
+        id -> Integer,
+        mansionee_id -> Integer,
+        name -> Text,
+        path -> Text,
     }
 }
 
 diesel::table! {
     settings (id) {
-        id -> Int4,
-        profile -> Nullable<Varchar>,
-        theme -> Nullable<Varchar>,
-        db_path -> Nullable<Varchar>,
+        id -> Integer,
+        profile -> Nullable<Text>,
+        theme -> Nullable<Text>,
+        db_path -> Nullable<Text>,
     }
 }
 
+diesel::joinable!(pictures -> mansionees (mansionee_id));
+
 diesel::allow_tables_to_appear_in_same_query!(
     mansionees,
+    pictures,
     settings,
 );

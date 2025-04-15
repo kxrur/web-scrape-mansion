@@ -1,16 +1,21 @@
+use std::thread;
+use std::time::Duration;
+
 use dirs::home_dir;
 use regex::Regex;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
 
+use crate::database::mansion::{save_mansion, Mansion, NewMansion};
 use crate::database::models::{Mansionee, NewMansionee, Picture};
-use crate::database::postgresql::save_mansionee_to_database;
+use crate::database::sqlite::save_mansionee;
 use crate::scrape::{
     action::close_cookie,
     save::{download_image, save_data_url_as_image},
 };
 
+use super::action::close_chat;
 use super::save::recursive_rename;
 use diesel::prelude::*;
 
@@ -33,7 +38,7 @@ pub async fn setup_driver(server_url: String) -> WebDriver {
         .expect("Failed to load driver")
 }
 
-pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<(Mansionee)> {
+pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<Mansion> {
     println!("{}", url);
     driver.goto(&url).await?;
     close_cookie(driver, &url).await;
@@ -61,8 +66,18 @@ pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<
 
         let house_type = eval_type(driver).await?;
 
-        let pictures = eval_imgs(driver, &address1).await;
-        let mansion = NewMansionee::new(
+        let pictures: Vec<Picture> = {
+            let mut result = None;
+            for _ in 1..=10 {
+                if let Some(pics) = eval_imgs(driver, &address1).await {
+                    result = Some(pics);
+                    break;
+                }
+                //tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+            }
+            result.unwrap_or_default()
+        };
+        let new_mansionee = NewMansionee::new(
             full_address,
             price,
             size,
@@ -70,12 +85,15 @@ pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<
             bathrooms,
             receptions,
             house_type,
-            pictures,
         );
-        mansion.log();
+        new_mansionee.log();
 
-        let mansionee = save_mansionee_to_database(mansion.clone());
-        mansionee.log();
+        let new_mansion = NewMansion {
+            mansion: new_mansionee,
+            pictures,
+        };
+
+        let mansionee = save_mansion(new_mansion).unwrap();
 
         Ok(mansionee)
     } else {
@@ -112,7 +130,7 @@ async fn eval_price(driver: &WebDriver) -> Result<i32, WebDriverError> {
     Ok(price)
 }
 
-async fn eval_size(driver: &WebDriver) -> Result<f64, WebDriverError> {
+async fn eval_size(driver: &WebDriver) -> Result<f32, WebDriverError> {
     let elem_size = driver.find(By::ClassName(SIZE_CS)).await?;
     let mut size_str = elem_size.text().await?;
     size_str.retain(|c| c != ',');
@@ -121,7 +139,7 @@ async fn eval_size(driver: &WebDriver) -> Result<f64, WebDriverError> {
     let caps = re.captures(&size_str).unwrap();
     size_str = caps["size"].to_string();
 
-    let size: f64 = size_str.parse().unwrap();
+    let size: f32 = size_str.parse().unwrap();
 
     println!("size: {} sq m", size_str);
     Ok(size)
@@ -172,65 +190,56 @@ async fn eval_type(driver: &WebDriver) -> Result<String, WebDriverError> {
     Ok(house_type)
 }
 
-async fn eval_imgs(driver: &WebDriver, address1: &String) -> Vec<Picture> {
+async fn eval_imgs(driver: &WebDriver, address1: &String) -> Option<Vec<Picture>> {
+    //FIXME: not sure if this is necessary
+    close_chat(driver).await;
     let mut all_img_file_paths: Vec<Picture> = Vec::new();
-    let elem_image_gallery_block = driver
-        .find(By::ClassName(GALLERY_BLOCK))
-        .await
-        .expect("failed to get the image gallery block");
 
+    let elem_image_gallery_block = driver.find(By::ClassName(GALLERY_BLOCK)).await.ok()?;
     let _ = elem_image_gallery_block.click().await;
 
-    let elem_image_block = driver
-        .find(By::ClassName(GALLERY_IMG))
-        .await
-        .expect("did not find the image block");
-    let images = elem_image_block
-        .find_all(By::Tag("img"))
-        .await
-        .expect("no 'img' tags where found in the image block");
+    let elem_image_block = driver.find(By::ClassName(GALLERY_IMG)).await.ok()?;
+    let images = elem_image_block.find_all(By::Tag("img")).await.ok()?;
+
     for img in images.iter() {
-        let mut name = img
-            .attr("alt")
-            .await
-            .expect("no alt attribute was found for image")
-            .expect("alt message is wrong")
-            .split('-')
-            .collect::<Vec<&str>>()[0]
+        let alt_attr = img.attr("alt").await.ok()??;
+        let mut name = alt_attr.split('-').collect::<Vec<&str>>()[0]
             .trim()
             .replace(' ', "_");
         if name.is_empty() {
             name = "_".to_string();
         }
-        let src = img
-            .attr("src")
-            .await
-            .expect("no src attr found")
-            .expect("src attr is wrong");
 
-        //FIXME:DO NOT SAVE THE DATABASE_PATH TO THE PSQL DATABASE !!!
-        let database_path = format!("{}/Desktop/images", home_dir().unwrap().to_string_lossy());
+        let src = img.attr("src").await.ok()??;
+
+        // Don't store full path in DB!
+        let database_path = home_dir()
+            .map(|p| format!("{}/Desktop/images", p.to_string_lossy()))
+            .unwrap_or_else(|| "./images".to_string());
         let foldername = remove_spaces(address1.clone());
+
         let file_path =
             recursive_rename(&format!("{}/{}/{}.jpg", database_path, foldername, &name)).await;
+
         let picture = Picture {
             path: format!("{}/{}/{}.jpg", database_path, foldername, &name),
             name,
         };
         all_img_file_paths.push(picture);
 
-        if src.starts_with("data:") {
-            println!("Data URL found: {}", src);
-            save_data_url_as_image(&src, &file_path)
-                .await
-                .expect("data URL did not save");
+        let result = if src.starts_with("data:") {
+            save_data_url_as_image(&src, &file_path).await
         } else {
-            download_image(&Client::new(), &src, &file_path)
-                .await
-                .expect("src URL did not save");
+            download_image(&Client::new(), &src, &file_path).await
+        };
+
+        if result.is_err() {
+            eprintln!("Failed to save image: {}", src);
+            continue; // optionally, or return None here if it's critical
         }
     }
-    all_img_file_paths
+
+    Some(all_img_file_paths)
 }
 fn remove_spaces(txt: String) -> String {
     txt.trim().replace(' ', "_")

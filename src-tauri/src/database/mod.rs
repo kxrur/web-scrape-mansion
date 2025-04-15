@@ -1,3 +1,4 @@
+pub mod mansion;
 pub mod models;
-pub mod postgresql;
 pub mod schema;
+pub mod sqlite;

@@ -1,11 +1,12 @@
 -- Your SQL goes here
 CREATE TABLE mansionees (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     address TEXT NOT NULL,
     price INTEGER,
-    size DOUBLE PRECISION,
+    size REAL,
     bedrooms INTEGER,
     bathrooms INTEGER,
     receptions INTEGER,
-    house_type TEXT NOT NULL
+    house_type TEXT NOT NULL,
+    uuid BINARY NOT NULL UNIQUE
 );

@@ -10,8 +10,9 @@ mod scrape;
 mod scraper;
 
 use database::{
+    mansion::{get_mansions, Mansion},
     models::{Mansionee, NewMansionee, Setting},
-    postgresql::{get_mansionees, get_settings, save_setting, update_setting},
+    sqlite::{get_mansionees, get_settings, save_setting, update_setting},
 };
 use scrape::errors::Error;
 use scraper::{scrape_one_mansion, test_massive_scrape, test_scrape_mansions};
@@ -20,7 +21,7 @@ use tauri::Manager;
 
 #[derive(Default)]
 struct AppState {
-    mansions: Vec<Mansionee>, //FIXME: use a HashMap instead of a Vec
+    mansions: Vec<Mansion>, //FIXME: use a HashMap instead of a Vec
     settings: Vec<Setting>,
 }
 use serde::{Deserialize, Serialize};
@@ -92,7 +93,7 @@ fn _greet(name: &str) -> String {
 async fn add_mansion(
     state: tauri::State<'_, Mutex<AppState>>,
     url: String,
-) -> Result<Mansionee, Error> {
+) -> Result<Mansion, Error> {
     match scrape_one_mansion(url.clone()).await {
         Ok(mansion) => {
             let mut state = state.lock().unwrap();
@@ -110,15 +111,15 @@ async fn add_mansion(
 #[specta::specta] // < You must annotate your commands
 async fn get_store_mansions(
     state: tauri::State<'_, Mutex<AppState>>,
-) -> Result<Vec<Mansionee>, Error> {
+) -> Result<Vec<Mansion>, Error> {
     let state = state.lock().unwrap();
     Ok(state.mansions.clone())
 }
 
 #[tauri::command]
 #[specta::specta] // < You must annotate your commands
-async fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<Mansionee>, Error> {
-    let n = 3;
+async fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<Mansion>, Error> {
+    let n = 2;
 
     match n {
         1 => test_scrape_mansions(vec![
@@ -146,16 +147,14 @@ async fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<M
 
 #[tauri::command]
 #[specta::specta] // < You must annotate your commands
-async fn load_all_url_mansions() -> Result<Vec<Mansionee>, Error> {
+async fn load_all_url_mansions() -> Result<Vec<Mansion>, Error> {
     test_massive_scrape().await
 }
 
 #[tauri::command]
 #[specta::specta] // < You must annotate your commands
-fn load_database_mansions(
-    state: tauri::State<'_, Mutex<AppState>>,
-) -> Result<Vec<Mansionee>, Error> {
-    let mansions = get_mansionees().unwrap();
+fn load_database_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<Mansion>, Error> {
+    let mansions = get_mansions().unwrap();
     let mut state = state.lock().unwrap();
     state.mansions = mansions;
     Ok(state.mansions.clone())
@@ -169,7 +168,7 @@ fn get_mansion_state_id_by_database_id(
 ) -> Result<i32, Error> {
     let state = state.lock().unwrap();
     for (index, mansion) in state.mansions.iter().enumerate() {
-        if mansion.uuid == mansionee.uuid {
+        if mansion.mansion.uuid == mansionee.uuid {
             return Ok(index as i32);
         }
     }
@@ -181,10 +180,7 @@ fn get_mansion_state_id_by_database_id(
 
 #[tauri::command]
 #[specta::specta]
-fn get_mansion_by_id(
-    id: u32,
-    state: tauri::State<'_, Mutex<AppState>>,
-) -> Result<Mansionee, Error> {
+fn get_mansion_by_id(id: u32, state: tauri::State<'_, Mutex<AppState>>) -> Result<Mansion, Error> {
     let state = state.lock().unwrap();
     match state.mansions.get(id as usize) {
         Some(mansion) => Ok(mansion.clone()),
