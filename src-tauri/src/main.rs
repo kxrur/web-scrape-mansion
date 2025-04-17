@@ -2,6 +2,11 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 #[macro_use]
+extern crate diesel;
+#[macro_use]
+extern crate diesel_migrations;
+
+#[macro_use]
 extern crate dotenv_codegen;
 
 mod database;
@@ -12,8 +17,9 @@ mod scraper;
 use database::{
     mansion::{get_mansions, Mansion},
     models::{Mansionee, NewMansionee, Setting},
-    sqlite::{get_mansionees, get_settings, save_setting, update_setting},
+    sqlite::{establish_connection, get_mansionees, get_settings, save_setting, update_setting},
 };
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use scrape::errors::Error;
 use scraper::{scrape_one_mansion, test_massive_scrape, test_scrape_mansions};
 use std::sync::Mutex;
@@ -42,7 +48,15 @@ struct Person {
     dream_floors: u32,
 }
 
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
+
 fn main() {
+    let mut connection = establish_connection();
+
+    connection
+        .run_pending_migrations(MIGRATIONS)
+        .expect("Error migrating");
+
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
         .commands(collect_commands![
