@@ -25,6 +25,9 @@ use scraper::{scrape_one_mansion, test_massive_scrape, test_scrape_mansions};
 use std::sync::Mutex;
 use tauri::Manager;
 
+use tauri_plugin_shell::process::CommandEvent;
+use tauri_plugin_shell::ShellExt;
+
 #[derive(Default)]
 struct AppState {
     mansions: Vec<Mansion>, //FIXME: use a HashMap instead of a Vec
@@ -80,9 +83,11 @@ fn main() {
         .expect("Failed to export typescript bindings");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_shell::init())
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             builder.mount_events(app);
@@ -91,6 +96,12 @@ fn main() {
             let _ = get_settings(app.state());
             let _ = load_database_mansions(app.state());
 
+            let sidecar_command = app
+                .shell()
+                .sidecar("chromedriver")
+                .unwrap()
+                .args(["--port=44444"]);
+            let (mut rx, mut _child) = sidecar_command.spawn().expect("Failed to spawn sidecar");
             Ok(())
         })
         .run(tauri::generate_context!())

@@ -9,9 +9,31 @@
     "fs:default",
     {
       "identifier": "fs:allow-exists",
-      "allow": [{ "path": "$HOME/*" }]
+      "allow": [
+        {
+          "path": "$HOME/*"
+        }
+      ]
+    },
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "args": [
+            "arg1",
+            "-a",
+            "--arg2",
+            {
+              "validator": "\\S+"
+            }
+          ],
+          "name": "chromedriver",
+          "sidecar": true
+        }
+      ]
     },
     "dialog:allow-open",
-    "dialog:allow-save"
+    "dialog:allow-save",
+    "shell:allow-open"
   ]
 }
