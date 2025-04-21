@@ -17,15 +17,13 @@ mod scraper;
 use database::{
     mansion::{get_mansions, Mansion},
     models::{Mansionee, NewMansionee, Setting},
-    sqlite::{establish_connection, get_mansionees, get_settings, save_setting, update_setting},
+    sqlite::{get_settings, init_database, save_setting, update_setting},
 };
-use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use scrape::errors::Error;
 use scraper::{scrape_one_mansion, test_massive_scrape, test_scrape_mansions};
 use std::sync::Mutex;
 use tauri::Manager;
 
-use tauri_plugin_shell::process::CommandEvent;
 use tauri_plugin_shell::ShellExt;
 
 #[derive(Default)]
@@ -51,15 +49,7 @@ struct Person {
     dream_floors: u32,
 }
 
-pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
-
 fn main() {
-    let mut connection = establish_connection();
-
-    connection
-        .run_pending_migrations(MIGRATIONS)
-        .expect("Error migrating");
-
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
         .commands(collect_commands![
@@ -92,6 +82,8 @@ fn main() {
         .setup(move |app| {
             builder.mount_events(app);
             app.manage(Mutex::new(AppState::default()));
+
+            init_database(app.app_handle());
 
             let _ = get_settings(app.state());
             let _ = load_database_mansions(app.state());

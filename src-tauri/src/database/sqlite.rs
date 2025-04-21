@@ -1,6 +1,8 @@
 use diesel::{Connection, SqliteConnection};
+use diesel_migrations::{EmbeddedMigrations, MigrationHarness};
 use dotenv::dotenv;
-use std::{env, panic, sync::Mutex};
+use std::{env, fs, panic, sync::Mutex};
+use tauri::Manager;
 
 use crate::AppState;
 
@@ -12,6 +14,30 @@ use super::{
     },
 };
 use diesel::prelude::*;
+
+#[tauri::command]
+pub fn init_database(app_handle: &tauri::AppHandle) {
+    pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
+
+    let app_dir = app_handle
+        .path()
+        .app_data_dir()
+        .expect("failed to retrieve data dir");
+
+    fs::create_dir_all(&app_dir).expect("failed to create data dir");
+
+    let db_path = dbg!(app_dir.join("mansions.db"));
+    env::set_var("DATABASE_URL", db_path);
+
+    for (key, value) in std::env::vars() {
+        println!("{key}: {value}");
+    }
+
+    let mut connection = establish_connection();
+    connection
+        .run_pending_migrations(MIGRATIONS)
+        .expect("Error migrating");
+}
 
 pub fn establish_connection() -> SqliteConnection {
     dotenv().ok();
