@@ -68,6 +68,6 @@
 </template>
 
 <script setup lang="ts">
-const visible = ref(null)
-const visible2 = ref(null)
+const visible = ref<boolean>()
+const visible2 = ref<boolean>()
 </script>

@@ -63,5 +63,5 @@
 </template>
 
 <script setup lang="ts">
-const visible = ref(null)
+const visible = ref<boolean>()
 </script>

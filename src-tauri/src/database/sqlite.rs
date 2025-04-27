@@ -26,12 +26,8 @@ pub fn init_database(app_handle: &tauri::AppHandle) {
 
     fs::create_dir_all(&app_dir).expect("failed to create data dir");
 
-    let db_path = dbg!(app_dir.join("mansions.db"));
+    let db_path = app_dir.join("mansions.db");
     env::set_var("DATABASE_URL", db_path);
-
-    for (key, value) in std::env::vars() {
-        println!("{key}: {value}");
-    }
 
     let mut connection = establish_connection();
     connection

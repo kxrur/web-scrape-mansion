@@ -1,18 +1,18 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "mansions",
+  "productName": "web-scrape-mansion",
   "version": "0.1.0",
   "identifier": "web.scrape.mansion",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:5173",
+    "devUrl": "http://localhost:3000",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build"
   },
   "app": {
     "windows": [
       {
-        "title": "mansions",
+        "title": "web-scrape-mansion",
         "width": 800,
         "height": 600,
         "resizable": true,
@@ -20,7 +20,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' ipc: http://ipc.localhost; img-src 'self' asset: http://asset.localhost",
+      "csp": null,
       "assetProtocol": {
         "enable": true,
         "scope": ["$HOME/Desktop/images/**"]

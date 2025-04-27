@@ -45,7 +45,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const drawer = ref(null)
+const drawer = ref<boolean>()
 
 const selectedLink = ref(null)
 
