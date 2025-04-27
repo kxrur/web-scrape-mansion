@@ -2,9 +2,10 @@
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import Fonts from 'unplugin-fonts/vite'
-import Layouts from 'vite-plugin-vue-layouts'
+import Layouts from 'vite-plugin-vue-layouts-next'
 import Vue from '@vitejs/plugin-vue'
 import VueRouter from 'unplugin-vue-router/vite'
+import { VueRouterAutoImports } from 'unplugin-vue-router'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
 // Utilities
@@ -21,8 +22,9 @@ export default defineConfig({
     AutoImport({
       imports: [
         'vue',
+        VueRouterAutoImports,
         {
-          'vue-router/auto': ['useRoute', 'useRouter'],
+          'pinia': ['defineStore', 'storeToRefs'],
         },
       ],
       dts: 'src/auto-imports.d.ts',
@@ -46,29 +48,46 @@ export default defineConfig({
     }),
     Fonts({
       google: {
-        families: [
-          {
-            name: 'Roboto',
-            styles: 'wght@100;300;400;500;700;900',
-          },
-        ],
+        families: [{
+          name: 'Roboto',
+          styles: 'wght@100;300;400;500;700;900',
+        }],
       },
     }),
   ],
+  optimizeDeps: {
+    exclude: [
+      'vuetify',
+      'vue-router',
+      'unplugin-vue-router/runtime',
+      'unplugin-vue-router/data-loaders',
+      'unplugin-vue-router/data-loaders/basic',
+    ],
+  },
   define: { 'process.env': {} },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '@c': fileURLToPath(new URL('./src/components', import.meta.url)),
     },
-    extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue'],
+    extensions: [
+      '.js',
+      '.json',
+      '.jsx',
+      '.mjs',
+      '.ts',
+      '.tsx',
+      '.vue',
+    ],
   },
   server: {
-    port: 5173,
+    port: 3000,
   },
   css: {
     preprocessorOptions: {
       sass: {
+        api: 'modern-compiler',
+      },
+      scss: {
         api: 'modern-compiler',
       },
     },

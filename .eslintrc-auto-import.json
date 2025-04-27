@@ -71,6 +71,12 @@
     "onWatcherCleanup": true,
     "useId": true,
     "useModel": true,
-    "useTemplateRef": true
+    "useTemplateRef": true,
+    "Slot": true,
+    "Slots": true,
+    "defineStore": true,
+    "onBeforeRouteLeave": true,
+    "onBeforeRouteUpdate": true,
+    "storeToRefs": true
   }
 }
