@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "web-scrape-mansion",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "identifier": "web.scrape.mansion",
   "build": {
     "frontendDist": "../dist",
