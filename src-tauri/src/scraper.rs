@@ -6,9 +6,12 @@ use crate::links::extract_savills_urls;
 use crate::scrape::errors::Error;
 use crate::scrape::scrape::{scrape_mansion, setup_driver};
 
-pub async fn test_scrape_mansions(links: Vec<String>) -> Result<Vec<Mansion>, Error> {
+pub async fn test_scrape_mansions(
+    links: Vec<String>,
+    db_path: &str,
+) -> Result<Vec<Mansion>, Error> {
     let driver = setup_driver("http://localhost:44444".to_string()).await;
-    let mansions = scrape_mansions(&driver, links).await;
+    let mansions = scrape_mansions(&driver, links, db_path).await;
     match driver.quit().await {
         Ok(_) => println!("Quit driver successfully"),
         Err(e) => println!("{}", e),
@@ -16,13 +19,13 @@ pub async fn test_scrape_mansions(links: Vec<String>) -> Result<Vec<Mansion>, Er
     Ok(mansions)
 }
 
-pub async fn test_massive_scrape() -> Result<Vec<Mansion>, Error> {
+pub async fn test_massive_scrape(db_path: &str) -> Result<Vec<Mansion>, Error> {
     let driver = setup_driver("http://localhost:44444".to_string()).await;
 
     let file_path = "src/bookmarks.html";
     let links = extract_savills_urls(file_path);
 
-    let mansions = scrape_mansions(&driver, links).await;
+    let mansions = scrape_mansions(&driver, links, db_path).await;
     match driver.quit().await {
         Ok(_) => println!("Quit driver successfully"),
         Err(e) => println!("{}", e),
@@ -30,10 +33,10 @@ pub async fn test_massive_scrape() -> Result<Vec<Mansion>, Error> {
     Ok(mansions)
 }
 
-pub async fn scrape_mansions(driver: &WebDriver, urls: Vec<String>) -> Vec<Mansion> {
+pub async fn scrape_mansions(driver: &WebDriver, urls: Vec<String>, db_path: &str) -> Vec<Mansion> {
     let mut mansions: Vec<Mansion> = Vec::new();
     for url in urls.iter() {
-        match scrape_mansion(driver, url.to_string()).await {
+        match scrape_mansion(driver, url.to_string(), db_path).await {
             Ok(mansion) => {
                 mansions.push(mansion);
             }
@@ -53,10 +56,10 @@ fn delete_all_imgs(path: &str) {
 }
 
 #[tauri::command]
-#[specta::specta] // < You must annotate your commands
-pub async fn scrape_one_mansion(url: String) -> Result<Mansion, Error> {
+#[specta::specta]
+pub async fn scrape_one_mansion(url: String, db_path: &str) -> Result<Mansion, Error> {
     let driver = setup_driver("http://localhost:44444".to_string()).await;
-    let result = match scrape_mansion(&driver, url.to_string()).await {
+    let result = match scrape_mansion(&driver, url.to_string(), db_path).await {
         Ok(mansion) => Ok(mansion),
         Err(e) => Err(Error::Parsing(format!("Failed to scrape mansion: {}", e))),
     };

@@ -150,14 +150,21 @@ pub fn get_settings(state: tauri::State<'_, Mutex<AppState>>) -> Option<Vec<Sett
 
 #[tauri::command]
 #[specta::specta]
-pub fn save_setting(new_setting: NewSetting) -> Option<Setting> {
+pub fn save_setting(
+    new_setting: NewSetting,
+    state: tauri::State<'_, Mutex<AppState>>,
+) -> Option<Setting> {
     let connection = &mut establish_connection();
     match diesel::insert_into(settings::table)
         .values(&new_setting)
         .returning(Setting::as_returning())
         .get_result(connection)
     {
-        Ok(setting) => Some(setting),
+        Ok(setting) => {
+            let mut state = state.lock().unwrap();
+            state.settings.insert(0, setting.clone());
+            Some(setting)
+        }
         Err(e) => {
             println!("Error saving the setting: {}", e);
             None
@@ -167,7 +174,7 @@ pub fn save_setting(new_setting: NewSetting) -> Option<Setting> {
 
 #[tauri::command]
 #[specta::specta]
-pub fn update_setting(setting: Setting) -> Option<u32> {
+pub fn update_setting(setting: Setting, state: tauri::State<'_, Mutex<AppState>>) -> Option<u32> {
     let connection = &mut establish_connection();
 
     match diesel::update(settings::table)
@@ -175,7 +182,11 @@ pub fn update_setting(setting: Setting) -> Option<u32> {
         .set(&setting)
         .execute(connection)
     {
-        Ok(num_rows) => Some(num_rows as u32),
+        Ok(num_rows) => {
+            let mut state = state.lock().unwrap();
+            state.settings.insert(0, setting.clone());
+            Some(num_rows as u32)
+        }
         Err(e) => {
             println!("Error updating the setting: {}", e);
             None

@@ -37,9 +37,9 @@ async getMansionById(id: number) : Promise<Result<Mansion, Error>> {
     else return { status: "error", error: e  as any };
 }
 },
-async scrapeOneMansion(url: string) : Promise<Result<Mansion, Error>> {
+async scrapeOneMansion(url: string, dbPath: string) : Promise<Result<Mansion, Error>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("scrape_one_mansion", { url }) };
+    return { status: "ok", data: await TAURI_INVOKE("scrape_one_mansion", { url, dbPath }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };

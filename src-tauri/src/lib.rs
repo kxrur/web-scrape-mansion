@@ -97,7 +97,16 @@ async fn add_mansion(
     state: tauri::State<'_, Mutex<AppState>>,
     url: String,
 ) -> Result<Mansion, Error> {
-    match scrape_one_mansion(url.clone()).await {
+    let db_path = state
+        .lock()
+        .unwrap()
+        .settings
+        .first()
+        .unwrap()
+        .clone()
+        .db_path
+        .unwrap();
+    match scrape_one_mansion(url.clone(), &db_path).await {
         Ok(mansion) => {
             let mut state = state.lock().unwrap();
             state.mansions.push(mansion.clone());
@@ -123,21 +132,34 @@ async fn get_store_mansions(
 #[specta::specta] // < You must annotate your commands
 async fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<Mansion>, Error> {
     let n = 2;
+    let db_path = state
+        .lock()
+        .unwrap()
+        .settings
+        .get(0)
+        .unwrap()
+        .clone()
+        .db_path
+        .unwrap();
 
     match n {
-        1 => test_scrape_mansions(vec![
-            "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
-        ]),
+        1 => test_scrape_mansions(
+            vec!["https://search.savills.com/property-detail/gbedrseds230103".to_string()],
+            &db_path,
+        ),
 
-        2 => test_scrape_mansions(vec![
-            "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
-            "https://search.savills.com/property-detail/gbslaklai220042".to_string(),
-            "https://search.savills.com/property-detail/gbslaklak200005".to_string(),
-        ]),
+        2 => test_scrape_mansions(
+            vec![
+                "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
+                "https://search.savills.com/property-detail/gbslaklai220042".to_string(),
+                "https://search.savills.com/property-detail/gbslaklak200005".to_string(),
+            ],
+            &db_path,
+        ),
 
         _ => {
             println!("No data is scraped");
-            test_scrape_mansions(vec!["".to_string()])
+            test_scrape_mansions(vec!["".to_string()], &db_path)
         }
     }
     .await // Return the result directly
@@ -150,8 +172,19 @@ async fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<M
 
 #[tauri::command]
 #[specta::specta] // < You must annotate your commands
-async fn load_all_url_mansions() -> Result<Vec<Mansion>, Error> {
-    test_massive_scrape().await
+async fn load_all_url_mansions(
+    state: tauri::State<'_, Mutex<AppState>>,
+) -> Result<Vec<Mansion>, Error> {
+    let db_path = state
+        .lock()
+        .unwrap()
+        .settings
+        .get(0)
+        .unwrap()
+        .clone()
+        .db_path
+        .unwrap();
+    test_massive_scrape(&db_path).await
 }
 
 #[tauri::command]
@@ -197,7 +230,9 @@ fn get_mansion_by_id(id: u32, state: tauri::State<'_, Mutex<AppState>>) -> Resul
 #[tauri::command]
 #[specta::specta]
 fn get_setting_by_id(id: u32, state: tauri::State<'_, Mutex<AppState>>) -> Result<Setting, Error> {
-    let state = state.lock().unwrap();
+    let statee = state.clone();
+    get_settings(state);
+    let state = statee.lock().unwrap();
     match state.settings.get(id as usize) {
         Some(setting) => Ok(setting.clone()),
         None => Err(Error::Parsing(format!(

@@ -1,23 +1,20 @@
-use std::thread;
-use std::time::Duration;
+use std::sync::Mutex;
 
 use dirs::home_dir;
 use regex::Regex;
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
 
 use crate::database::mansion::{save_mansion, Mansion, NewMansion};
-use crate::database::models::{Mansionee, NewMansionee, Picture};
-use crate::database::sqlite::save_mansionee;
+use crate::database::models::{NewMansionee, Picture};
 use crate::scrape::{
     action::close_cookie,
     save::{download_image, save_data_url_as_image},
 };
+use crate::AppState;
 
 use super::action::close_chat;
 use super::save::recursive_rename;
-use diesel::prelude::*;
 
 pub const ADDRESS1_CS: &str = "sv-property-intro__address-line-1";
 pub const ADDRESS2_CS: &str = "sv-property-intro__address-line-2";
@@ -38,7 +35,11 @@ pub async fn setup_driver(server_url: String) -> WebDriver {
         .expect("Failed to load driver")
 }
 
-pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<Mansion> {
+pub async fn scrape_mansion(
+    driver: &WebDriver,
+    url: String,
+    db_path: &str,
+) -> WebDriverResult<Mansion> {
     println!("{}", url);
     driver.goto(&url).await?;
     close_cookie(driver, &url).await;
@@ -69,7 +70,7 @@ pub async fn scrape_mansion(driver: &WebDriver, url: String) -> WebDriverResult<
         let pictures: Vec<Picture> = {
             let mut result = None;
             for _ in 1..=10 {
-                if let Some(pics) = eval_imgs(driver, &address1).await {
+                if let Some(pics) = eval_imgs(driver, &address1, db_path).await {
                     result = Some(pics);
                     break;
                 }
@@ -190,7 +191,11 @@ async fn eval_type(driver: &WebDriver) -> Result<String, WebDriverError> {
     Ok(house_type)
 }
 
-async fn eval_imgs(driver: &WebDriver, address1: &String) -> Option<Vec<Picture>> {
+async fn eval_imgs(
+    driver: &WebDriver,
+    address1: &String,
+    database_path: &str,
+) -> Option<Vec<Picture>> {
     //FIXME: not sure if this is necessary
     close_chat(driver).await;
     let mut all_img_file_paths: Vec<Picture> = Vec::new();
@@ -213,9 +218,9 @@ async fn eval_imgs(driver: &WebDriver, address1: &String) -> Option<Vec<Picture>
         let src = img.attr("src").await.ok()??;
 
         // Don't store full path in DB!
-        let database_path = home_dir()
-            .map(|p| format!("{}/Desktop/images", p.to_string_lossy()))
-            .unwrap_or_else(|| "./images".to_string());
+        // let database_path = home_dir()
+        //     .map(|p| format!("{}/{}", p.to_string_lossy(), db_path))
+        //     .unwrap_or_else(|| "./images".to_string());
         let foldername = remove_spaces(address1.clone());
 
         let file_path =
