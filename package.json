@@ -51,5 +51,10 @@
     "vite-plugin-vuetify": "^2.1.1",
     "vue-router": "^4.5.0",
     "vue-tsc": "^2.2.8"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
