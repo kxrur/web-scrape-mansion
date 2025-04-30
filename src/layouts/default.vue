@@ -2,7 +2,6 @@
   <v-main>
     <NavBar>
       <router-view />
-      <AppFooter />
     </NavBar>
   </v-main>
 
