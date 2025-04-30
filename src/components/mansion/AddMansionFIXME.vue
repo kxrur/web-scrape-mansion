@@ -35,10 +35,11 @@
     <div v-if="mansion && id">
       <v-container class="fill-height">
         <v-responsive class="align-center fill-height">
-          <v-row no-gutters>
-            <MansionImages :id="id.toString()"></MansionImages>
-            <MnasionDescription :id="id.toString()"></MnasionDescription>
-          </v-row>
+          <!-- <v-row no-gutters> -->
+          <!--   <MansionImages :id="id.toString()"></MansionImages> -->
+          <!--   <MnasionDescription :id="id.toString()"></MnasionDescription> -->
+          <!-- </v-row> -->
+          <Mansion :id="id.toString()"></Mansion>
         </v-responsive>
       </v-container>
     </div>

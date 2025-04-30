@@ -14,6 +14,7 @@
 </template>
 
 <script setup lang="ts">
-const route = useRoute('/mansions/[id]')
-const id = ref(route.params.id)
+const props = defineProps<{
+  id: string
+}>()
 </script>
