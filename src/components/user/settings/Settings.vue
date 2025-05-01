@@ -47,9 +47,11 @@
           <v-card-text>
             <SettingsBar
               :selected-section="selectedSection"
+              :setting="settings"
               @update:is-dialog-open="(value) => (isDialogOpen = value)"
               @update:selectedSection="(value) => (selectedSection = value)"
               @update:dataFolder="(value) => (settings.db_path = value)"
+              @update:theme="(value) => (settings.theme = value)"
             ></SettingsBar>
             <v-divider class="mt-2"></v-divider>
 
@@ -106,6 +108,20 @@ const alert = ref<{
   show: false,
   type: undefined,
   message: '',
+})
+
+onMounted(() => {
+  commands
+    .getSettingById(0)
+    .then((new_settings) => {
+      console.log('settings', new_settings)
+      if (new_settings.status == 'ok') {
+        settings.value = new_settings.data
+      }
+    })
+    .catch((error) => {
+      console.error('Promise rejected with error: ' + error)
+    })
 })
 
 function applySettings() {

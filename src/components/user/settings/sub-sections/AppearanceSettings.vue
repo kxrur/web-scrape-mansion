@@ -24,9 +24,18 @@
 <script setup lang="ts">
 import { useTheme } from 'vuetify'
 import { customThemes } from '@/plugins/CustomThemes'
+import { type Setting } from '@/bindings'
+
+const props = defineProps<{
+  setting: Setting
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:theme', value: string): void
+}>()
 
 const theme = useTheme()
-const selectedTheme = ref('System')
+const selectedTheme = ref<string | null>('System')
 
 interface ThemeOption {
   title: string
@@ -40,7 +49,6 @@ const customThemeNames: ThemeOption[] = Object.keys(customThemes).map(
   })
 )
 
-// Available theme options
 const themeOptions: ThemeOption[] = [
   { title: 'Light', value: 'light' },
   { title: 'Dark', value: 'dark' },
@@ -48,7 +56,11 @@ const themeOptions: ThemeOption[] = [
   ...customThemeNames,
 ]
 
-console.log(themeOptions)
+onMounted(() => {
+  selectedTheme.value = props.setting.theme
+  console.log(themeOptions)
+  changeTheme(selectedTheme.value ? selectedTheme.value : 'System')
+})
 
 function changeTheme(newTheme: string) {
   switch (newTheme) {
@@ -67,10 +79,6 @@ function changeTheme(newTheme: string) {
         theme.global.name.value = newTheme
       }
   }
+  emit('update:theme', newTheme)
 }
-
-onMounted(() => {
-  selectedTheme.value = 'system'
-  changeTheme('system')
-})
 </script>

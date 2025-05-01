@@ -26,9 +26,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { open } from '@tauri-apps/plugin-dialog'
-import { commands } from '@/bindings'
+import { type Setting } from '@/bindings'
 
-const isDialogOpen = ref<boolean>(false)
+const props = defineProps<{
+  setting: Setting
+}>()
 
 const emit = defineEmits<{
   (e: 'update:isDialogOpen', value: boolean): void
@@ -37,17 +39,11 @@ const emit = defineEmits<{
 
 const dataFolder = ref<string | null>(null)
 
-commands
-  .getSettingById(0)
-  .then((settings) => {
-    console.log('settings', settings)
-    if (settings.status == 'ok') {
-      dataFolder.value = settings.data.db_path
-    }
-  })
-  .catch((error) => {
-    console.error('Promise rejected with error: ' + error)
-  })
+const isDialogOpen = ref<boolean>(false)
+
+onMounted(() => {
+  dataFolder.value = props.setting.db_path
+})
 
 const openDirectoryPicker = async () => {
   try {

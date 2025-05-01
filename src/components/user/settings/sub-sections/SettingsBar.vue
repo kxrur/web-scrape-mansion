@@ -29,6 +29,7 @@
     <v-col cols="9">
       <DataSettings
         v-if="selectedSection === 'Data'"
+        :setting="setting"
         @update:isDialogOpen="
           (value) => {
             isDialogOpen = value
@@ -37,24 +38,29 @@
         "
         @update:dataFolder="(value) => $emit('update:dataFolder', value)"
       />
-      <AppearanceSettings v-else-if="selectedSection === 'Appearance'" />
+      <AppearanceSettings
+        v-else-if="selectedSection === 'Appearance'"
+        :setting="setting"
+        @update:theme="(value) => $emit('update:theme', value)"
+      />
     </v-col>
   </v-row>
 </template>
 
 <script setup lang="ts">
+import { type Setting } from '@/bindings'
+
+defineProps<{
+  selectedSection: String
+  setting: Setting
+}>()
+
 defineEmits<{
   (e: 'update:isDialogOpen', value: boolean): void
   (e: 'update:selectedSection', value: string): void
   (e: 'update:dataFolder', value: string): void
+  (e: 'update:theme', value: string): void
 }>()
 
 const isDialogOpen = ref<boolean>(false)
-
-defineProps({
-  selectedSection: {
-    type: String,
-    required: true,
-  },
-})
 </script>
