@@ -9,7 +9,7 @@
       class="mb-4"
       color="primary"
       v-model="selectedTheme"
-      @update:modelValue="changeTheme"
+      @update:modelValue="handleThemeChange"
     ></v-select>
 
     <v-switch
@@ -22,9 +22,9 @@
 </template>
 
 <script setup lang="ts">
-import { useTheme } from 'vuetify'
-import { customThemes } from '@/plugins/CustomThemes'
+import { customThemes, changeTheme } from '@/plugins/CustomThemes'
 import { type Setting } from '@/bindings'
+import { useTheme } from 'vuetify'
 
 const props = defineProps<{
   setting: Setting
@@ -34,8 +34,8 @@ const emit = defineEmits<{
   (e: 'update:theme', value: string): void
 }>()
 
-const theme = useTheme()
 const selectedTheme = ref<string | null>('System')
+const theme = useTheme()
 
 interface ThemeOption {
   title: string
@@ -58,27 +58,10 @@ const themeOptions: ThemeOption[] = [
 
 onMounted(() => {
   selectedTheme.value = props.setting.theme
-  console.log(themeOptions)
-  changeTheme(selectedTheme.value ? selectedTheme.value : 'System')
 })
 
-function changeTheme(newTheme: string) {
-  switch (newTheme) {
-    case 'light':
-    case 'dark':
-      theme.global.name.value = newTheme
-      break
-    case 'system':
-      const prefersDark = window.matchMedia(
-        '(prefers-color-scheme: dark)'
-      ).matches
-      theme.global.name.value = prefersDark ? 'dark' : 'light'
-      break
-    default:
-      if (customThemes[newTheme]) {
-        theme.global.name.value = newTheme
-      }
-  }
+function handleThemeChange(newTheme: string) {
+  changeTheme(theme, newTheme)
   emit('update:theme', newTheme)
 }
 </script>

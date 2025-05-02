@@ -1,4 +1,5 @@
-import { type ThemeDefinition } from 'vuetify'
+import { commands } from '@/bindings'
+import { type ThemeDefinition, type ThemeInstance } from 'vuetify'
 
 export const customThemes: { [key: string]: ThemeDefinition } = {
   myCustomLightTheme: {
@@ -31,4 +32,40 @@ export const customThemes: { [key: string]: ThemeDefinition } = {
       warning: '#FFC107',
     },
   },
+}
+
+export function changeTheme(currentTheme: ThemeInstance, newTheme: string) {
+  switch (newTheme) {
+    case 'light':
+    case 'dark':
+      currentTheme.global.name.value = newTheme
+      break
+    case 'system':
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches
+      currentTheme.global.name.value = prefersDark ? 'dark' : 'light'
+      break
+    default:
+      if (customThemes[newTheme]) {
+        currentTheme.global.name.value = newTheme
+      }
+  }
+}
+
+export function initTheme(currentTheme: ThemeInstance) {
+  commands
+    .getSettingById(0)
+    .then((theSettings) => {
+      console.log('settings', theSettings)
+      if (theSettings.status == 'ok') {
+        changeTheme(
+          currentTheme,
+          theSettings.data.theme ? theSettings.data.theme : 'System'
+        )
+      }
+    })
+    .catch((error) => {
+      console.error('Promise rejected with error: ' + error)
+    })
 }

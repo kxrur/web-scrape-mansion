@@ -5,5 +5,11 @@
 </template>
 
 <script lang="ts" setup>
-  //
+import { initTheme } from '@/plugins/CustomThemes'
+import { useTheme } from 'vuetify'
+
+onMounted(() => {
+  const theme = useTheme()
+  initTheme(theme)
+})
 </script>
