@@ -25,7 +25,7 @@ log = "0.4"
 tauri = { version = "2.5.0", features = ["protocol-asset"] }
 tauri-plugin-log = "2.0.0-rc"
 uuid = { version = "1.0", features = ["v4", "serde"] }
-thirtyfour = "0.32.0"
+thirtyfour = "0.35.0"
 tokio = "1.38.0"
 webdriver-install = "0.3.2"
 image = "0.25.1"
@@ -48,6 +48,7 @@ anyhow = "1.0.96"
 tauri-plugin-dialog = "2.2.0"
 diesel_migrations = "2.2.0"
 tauri-plugin-shell = "2"
+chromedriver-manager = "0.4.0"
 
 
 

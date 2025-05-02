@@ -1,6 +1,6 @@
-use std::sync::Mutex;
+use std::process;
 
-use dirs::home_dir;
+use chromedriver_manager::{loglevel::LogLevel, manager::Handler};
 use regex::Regex;
 use reqwest::Client;
 use thirtyfour::prelude::*;
@@ -11,7 +11,6 @@ use crate::scrape::{
     action::close_cookie,
     save::{download_image, save_data_url_as_image},
 };
-use crate::AppState;
 
 use super::action::close_chat;
 use super::save::recursive_rename;
@@ -26,13 +25,23 @@ pub const TYPE_CS: &str = "sv-property-intro-footer__group:nth-child(1) > div:nt
 pub const GALLERY_BLOCK: &str = "Gallerystyled__LeadGalleryContent-sc-h7kctk-1";
 pub const GALLERY_IMG: &str = "FullGallerystyled__FullGalleryWrapper-sc-cye8ql-0";
 
-pub async fn setup_driver(server_url: String) -> WebDriver {
+pub async fn setup_driver(server_url: String) -> (WebDriver, process::Child) {
     //command: chromedriver --port=44444  (need the chromium package)
-    let caps = DesiredCapabilities::chrome();
+
+    let mut caps = DesiredCapabilities::chrome();
+
     //caps.add_arg("--headless=new")?; // hide the browser
-    WebDriver::new(server_url, caps)
+
+    let chromedriver = Handler::new()
+        .launch_chromedriver(&mut caps, "22222", LogLevel::Warning)
         .await
-        .expect("Failed to load driver")
+        .expect("Failed to launch chromedriver");
+
+    let driver = WebDriver::new(server_url, caps)
+        .await
+        .expect("Failed to load driver");
+
+    (driver, chromedriver)
 }
 
 pub async fn scrape_mansion(

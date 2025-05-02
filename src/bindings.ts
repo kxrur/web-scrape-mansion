@@ -5,25 +5,9 @@
 
 
 export const commands = {
-async loadMansions() : Promise<Result<Mansion[], Error>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("load_mansions") };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
 async loadDatabaseMansions() : Promise<Result<Mansion[], Error>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("load_database_mansions") };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async loadAllUrlMansions() : Promise<Result<Mansion[], Error>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("load_all_url_mansions") };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };

@@ -13,18 +13,14 @@ mod scraper;
 
 use database::{
     mansion::{get_mansions, Mansion},
-    models::{Mansionee, NewMansionee, Setting},
+    models::{Mansionee, Setting},
     sqlite::{get_settings, init_database, save_setting, update_setting},
 };
 use scrape::errors::Error;
-use scraper::{scrape_one_mansion, test_massive_scrape, test_scrape_mansions};
+use scraper::scrape_one_mansion;
 use std::sync::Mutex;
 use tauri::Manager;
 
-use tauri_plugin_shell::ShellExt;
-
-use serde::{Deserialize, Serialize};
-use specta::Type;
 use specta_typescript::Typescript;
 use tauri_specta::{collect_commands, Builder};
 
@@ -38,9 +34,8 @@ pub fn run() {
     let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
         .commands(collect_commands![
-            load_mansions,
             load_database_mansions,
-            load_all_url_mansions,
+            //load_all_url_mansions,
             get_mansion_by_id,
             scrape_one_mansion,
             get_settings,
@@ -73,12 +68,6 @@ pub fn run() {
             let _ = get_settings(app.state());
             let _ = load_database_mansions(app.state());
 
-            let sidecar_command = app
-                .shell()
-                .sidecar("chromedriver")
-                .unwrap()
-                .args(["--port=44444"]);
-            let (mut rx, mut _child) = sidecar_command.spawn().expect("Failed to spawn sidecar");
             Ok(())
         })
         .run(tauri::generate_context!())
@@ -128,64 +117,22 @@ async fn get_store_mansions(
     Ok(state.mansions.clone())
 }
 
-#[tauri::command]
-#[specta::specta] // < You must annotate your commands
-async fn load_mansions(state: tauri::State<'_, Mutex<AppState>>) -> Result<Vec<Mansion>, Error> {
-    let n = 2;
-    let db_path = state
-        .lock()
-        .unwrap()
-        .settings
-        .get(0)
-        .unwrap()
-        .clone()
-        .db_path
-        .unwrap();
-
-    match n {
-        1 => test_scrape_mansions(
-            vec!["https://search.savills.com/property-detail/gbedrseds230103".to_string()],
-            &db_path,
-        ),
-
-        2 => test_scrape_mansions(
-            vec![
-                "https://search.savills.com/property-detail/gbedrseds230103".to_string(),
-                "https://search.savills.com/property-detail/gbslaklai220042".to_string(),
-                "https://search.savills.com/property-detail/gbslaklak200005".to_string(),
-            ],
-            &db_path,
-        ),
-
-        _ => {
-            println!("No data is scraped");
-            test_scrape_mansions(vec!["".to_string()], &db_path)
-        }
-    }
-    .await // Return the result directly
-
-    // If you need to update the state with the scraped mansions:
-    // let mut state = state.lock().unwrap();
-    // state.mansions = result?;
-    // Ok(state.mansions.clone())
-}
-
-#[tauri::command]
-#[specta::specta] // < You must annotate your commands
-async fn load_all_url_mansions(
-    state: tauri::State<'_, Mutex<AppState>>,
-) -> Result<Vec<Mansion>, Error> {
-    let db_path = state
-        .lock()
-        .unwrap()
-        .settings
-        .get(0)
-        .unwrap()
-        .clone()
-        .db_path
-        .unwrap();
-    test_massive_scrape(&db_path).await
-}
+// #[tauri::command]
+// #[specta::specta] // < You must annotate your commands
+// async fn load_all_url_mansions(
+//     state: tauri::State<'_, Mutex<AppState>>,
+// ) -> Result<Vec<Mansion>, Error> {
+//     let db_path = state
+//         .lock()
+//         .unwrap()
+//         .settings
+//         .get(0)
+//         .unwrap()
+//         .clone()
+//         .db_path
+//         .unwrap();
+//     test_massive_scrape(&db_path).await
+// }
 
 #[tauri::command]
 #[specta::specta] // < You must annotate your commands
